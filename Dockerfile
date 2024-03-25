@@ -9,7 +9,7 @@ RUN apk add postgresql-client build-base postgresql-dev
 
 RUN pip install -r /tmp/requirements.txt
 
-COPY app /app
+COPY safety_site /app
 WORKDIR /app
 EXPOSE 8000
 
