@@ -1,0 +1,53 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+    container_name: django-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    command: >
+      sh -c "python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    networks:
+      - default
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    restart: always
+    env_file:
+      - ./.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - default
+
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "82:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mikhailroot01@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
