@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% extends 'cabinet/base_cabinet.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Камеры {% endblock title %}</title>
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+    {% block navbar %}
+        {{ block.super }}
+    {% endblock navbar %}
+    {% block navbar2 %}
+        {{ block.super }}
+    {% endblock navbar2 %}
+    {% endblock body %}
+</body>
+</html>

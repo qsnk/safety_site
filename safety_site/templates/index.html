@@ -3,8 +3,10 @@
 {% load static %}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %} Главная страница {% endblock title %}</title>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Главная страница {% endblock title %}</title>
+    {% endblock head %}
 </head>
 <body>
 
