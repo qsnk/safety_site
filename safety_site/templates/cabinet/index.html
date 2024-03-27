@@ -1,8 +1,12 @@
 <!DOCTYPE html>
+{% extends 'cabinet/base_cabinet.html' %}
+{% load static %}
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Личный кабинет {% endblock title %}</title>
+    {% endblock head %}
 </head>
 <body>
 

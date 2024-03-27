@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-{% extends 'base.html' %}
+{% extends 'ui/base.html' %}
 {% load static %}
 <html lang="en">
 <head>
@@ -10,30 +10,33 @@
 </head>
 <body>
     {% block body %}
-    {% block navbar %}
-        {{ block.super }}
-    {% endblock navbar %}
     {% block navbar2 %}
+    <div class="container">
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <div class="container-fluid">
+                <a class="navbar-brand" href="{% url 'index' %}">Безопасная площадка</a>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                         <li class="nav-item">
-                            <a class="nav-link active" aria-current="page" href="">Камеры</a>
+                            <a class="nav-link active" aria-current="page" href="{% url 'cabinet_cameras'%}">Камеры</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="">Отчеты</a>
+                            <a class="nav-link" href="{% url 'cabinet_reports'%}">Отчеты</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="">Журнал</a>
+                            <a class="nav-link" href="{% url 'cabinet_journal'%}">Журнал</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="">Статистика</a>
+                            <a class="nav-link" href="{% url 'cabinet_statistics'%}">Статистика</a>
                         </li>
                     </ul>
+                    <a href="{% url 'cabinet_index' %}">
+                        <button class="profile rounded-circle" style="background: transparent; width: 40px; height: 40px; border: 2px solid;"></button>
+                    </a>
                 </div>
             </div>
         </nav>
+    </div>
     {% endblock navbar2 %}
     {% endblock body %}
 </body>
