@@ -9,6 +9,8 @@
     {% endblock head %}
 </head>
 <body>
-
+    {% block body %}
+    {{ block.super }}
+    {% endblock body %}
 </body>
 </html>
