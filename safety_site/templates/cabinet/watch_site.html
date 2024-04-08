@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{% extends 'cabinet/base_cabinet.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Смотреть площадку {% endblock title %}</title>
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+    {{ block.super }}
+    {% block content %}
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col">
+                <div class="camera">
+                    <iframe id="camera1" src="http://77.222.181.11:8080/mjpg/video.mjpg" allow="autoplay" width="800" height="600"> </iframe>
+                    <source src = "http://77.222.181.11:8080/mjpg/video.mjpg" type = "video/mp4">
+                    <button class="btn btn-outline-primary" id="playbtn">Play</button>
+                    <button class="btn btn-outline-primary" id="pausebtn">Pause</button>
+                    <script>
+
+                    </script>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock content %}
+    {% endblock body %}
+</body>
+</html>

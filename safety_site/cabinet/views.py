@@ -4,8 +4,11 @@ from django.shortcuts import render
 def index(request):
     return render(request, 'cabinet/index.html')
 
-def cameras(request):
-    return render(request, 'cabinet/cameras.html')
+def add_cameras(request):
+    return render(request, 'cabinet/add_cameras.html')
+
+def watch_site(request):
+    return render(request, 'cabinet/watch_site.html')
 
 def reports(request):
     return render(request, 'cabinet/reports.html')
