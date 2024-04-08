@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+{% extends 'cabinet/base_cabinet.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Добавление камер {% endblock title %}</title>
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+    {{ block.super }}
+    {% block content %}
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col">
+                    {% block add_cameras %}
+                    <h2>Добавление камер</h2>
+                    <div class="row">
+                        <div class="col">
+                            <button class="btn btn-outline-dark">Добавить камеру</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            {% block cameras_table %}
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Название</th>
+                                            <th scope="col">Ссылка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                          <th scope="row">1</th>
+                                          <td>Лыжная база</td>
+                                          <td>http://77.222.181.11:8080/mjpg/video.mjpg</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            {% endblock cameras_table %}
+                        </div>
+                    </div>
+                    {% endblock add_cameras %}
+                </div>
+            </div>
+        </div>
+    {% endblock content %}
+    {% endblock body %}
+</body>
+</html>
