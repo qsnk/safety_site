@@ -9,7 +9,7 @@ services:
     volumes:
       - ./safety_site:/app
     command: >
-      sh -c "python manage.py runserver 0.0.0.0:8000"
+      bash entrypoint.sh
     env_file:
       - ./.env
     depends_on:
