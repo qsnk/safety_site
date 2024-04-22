@@ -6,10 +6,9 @@ services:
     container_name: django-app
     ports:
       - "8000:8000"
+    entrypoint: sh /tmp/entrypoint.sh
     volumes:
       - ./safety_site:/app
-    command: >
-      bash entrypoint.sh
     env_file:
       - ./.env
     depends_on:

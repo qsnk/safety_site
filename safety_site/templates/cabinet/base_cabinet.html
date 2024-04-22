@@ -38,7 +38,7 @@
                     </ul>
                     <a href="{% url 'cabinet_index' %}">
                         <button class="profile rounded-circle" style="background: transparent; width: 40px; height: 40px; border: 2px solid;">
-                            <span>M</span>
+                            <span>{{ request.user.email.0|upper }}</span>
                         </button>
                     </a>
                 </div>

@@ -19,7 +19,36 @@
                     <h2>Добавление камер</h2>
                     <div class="row">
                         <div class="col">
-                            <button class="btn btn-outline-dark">Добавить камеру</button>
+                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Добавить камеру</button>
+                        </div>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Добавить камеру</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            {{ form.as_p }}
+                                            {% if messages %}
+                                            <div class="messages">
+                                            {% for message in messages %}
+                                                <div class="error-message">
+                                                    {{ message }}
+                                                </div>
+                                            {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                                <button type="submit" class="btn btn-primary">Добавить</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="row">
@@ -34,11 +63,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                    {% for camera in cameras %}
                                         <tr>
-                                          <th scope="row">1</th>
-                                          <td>Лыжная база</td>
-                                          <td>http://77.222.181.11:8080/mjpg/video.mjpg</td>
+                                            <th scope="row">{{ camera.id }}</th>
+                                            <td>{{ camera.name }}</td>
+                                            <td>{{ camera.url }}</td>
                                         </tr>
+                                    {% endfor %}
                                     </tbody>
                                 </table>
                             {% endblock cameras_table %}
