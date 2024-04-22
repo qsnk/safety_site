@@ -11,7 +11,7 @@ class NeuralNetwork(models.Model):
 
 class Camera(models.Model):
     name = models.CharField(name="name",max_length=100, null=False, help_text="Введите название камеры", verbose_name="Название камеры")
-    url = models.CharField(name="url",max_length=100, null=False, help_text="Введите ссылку для подключения к камере", verbose_name="Ссылка для подключения к камере")
+    url = models.CharField(name="url", max_length=300, null=False, help_text="Введите ссылку для подключения к камере", verbose_name="Ссылка для подключения к камере")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
 
