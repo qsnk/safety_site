@@ -11,6 +11,12 @@
 <body>
     {% block body %}
     {{ block.super }}
+    {% block content %}
+    <div class="container">
+        <h2 class="mt-4">Личный кабинет</h2>
+
+    </div>
+    {% endblock content %}
     {% endblock body %}
 </body>
 </html>

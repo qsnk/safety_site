@@ -9,6 +9,8 @@ def index(request):
     return render(request, 'ui/index.html')
 
 def sign_in(request):
+    if request.user.is_authenticated:
+        return redirect('/cabinet/')
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():

@@ -7,7 +7,9 @@ from cabinet.models import Camera
 
 # Create your views here.
 def index(request):
-    return render(request, 'cabinet/index.html')
+    user = request.user
+    context = {"user": user}
+    return render(request, 'cabinet/index.html', context)
 
 def add_cameras(request):
     if request.method == "POST":
