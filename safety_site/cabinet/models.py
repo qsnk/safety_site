@@ -18,7 +18,8 @@ class Camera(models.Model):
 class Place(models.Model):
     name = models.CharField(name="name", max_length=100, null=False, help_text="Введите название площадки", verbose_name="Название площадки")
     description = models.CharField(name="description", max_length=200, null=True, help_text="Введите описание площадки", verbose_name="Описание площадки")
-    camera_id = models.ForeignKey(Camera, on_delete=models.CASCADE, db_column="camera_id", verbose_name="Идентификатор камеры")
+    camera_id = models.ForeignKey(Camera, on_delete=models.CASCADE, db_column="camera_id", verbose_name="Идентификатор камеры", default=None)
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя", default=None)
 
 
 class Violation(models.Model):
