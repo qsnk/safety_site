@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+{% extends 'cabinet/base_cabinet.html' %}
+{% load static %}
+<html lang="en">
+<head>
+    {% block head %}
+        {{ block.super }}
+        <title>{% block title %} Добавление участков {% endblock title %}</title>
+    {% endblock head %}
+</head>
+<body>
+    {% block body %}
+    {{ block.super }}
+    {% block content %}
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col">
+                    {% block add_place %}
+                    <h2>Добавление участков</h2>
+                    <div class="row">
+                        <div class="col">
+                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Добавить участок</button>
+                        </div>
+                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Добавить участок</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            {{ form.as_p }}
+                                            {% if messages %}
+                                            <div class="messages">
+                                            {% for message in messages %}
+                                                <div class="error-message">
+                                                    {{ message }}
+                                                </div>
+                                            {% endfor %}
+                                            </div>
+                                            {% endif %}
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                                <button type="submit" class="btn btn-primary">Добавить</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="mt-4">Участки</h3>
+                    <div class="row">
+                            <div class="col">
+                                {% block place_table %}
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Название</th>
+                                                <th scope="col">Описание</th>
+                                                <th scope="col">Камера</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% for place in places %}
+                                            <tr>
+                                                <td>{{ place.name }}</td>
+                                                <td>{{ place.description }}</td>
+                                                <td>{{ place.camera_id.name }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                        </tbody>
+                                    </table>
+                                {% endblock place_table %}
+                            </div>
+                        </div>
+                    {% endblock add_place %}
+                </div>
+            </div>
+        </div>
+    {% endblock content %}
+    {% endblock body %}
+</body>
+</html>

@@ -14,12 +14,17 @@
     {% block content %}
         <div class="container mt-4">
             <div class="row">
+                <div class="col">
+                    {% block reports %}
+                    <h2>Сформировать отчет</h2>
+                    {% endblock reports %}
+                </div>
                 <div class="col col-auto">
                     {% block sidebar %}
                     <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
                         Фильтры
                     </button>
-                    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
                         <div class="offcanvas-header">
                             <h5 id="offcanvasStartLabel">Информация</h5>
                             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -29,11 +34,6 @@
                         </div>
                     </div>
                     {% endblock sidebar %}
-                </div>
-                <div class="col">
-                    {% block reports %}
-                    <h2>Сформировать отчет</h2>
-                    {% endblock reports %}
                 </div>
             </div>
         </div>
