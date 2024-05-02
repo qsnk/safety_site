@@ -13,76 +13,44 @@
     {{ block.super }}
     {% block content %}
     <div class="container mt-4">
-        <h2>Смотреть площадку</h2>
         <div class="row">
-            <div class="col col-auto">
-                <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Добавить участок</button>
+            <div class="col">
+                {% block watch %}
+                <h2>Смотреть площадку</h2>
+
+                {% endblock watch %}
             </div>
             <div class="col col-auto">
-                <button class="btn btn-outline-dark" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-                    Смотреть участки
+                {% block sidebar %}
+                <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
+                    Фильтры
                 </button>
-            </div>
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Добавить участок</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="post">
-                                {% csrf_token %}
-                                {{ form.as_p }}
-                                {% if messages %}
-                                <div class="messages">
-                                {% for message in messages %}
-                                    <div class="error-message">
-                                        {{ message }}
-                                    </div>
-                                {% endfor %}
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
+                    <div class="offcanvas-header">
+                        <h5 id="offcanvasStartLabel">Выбрать участок</h5>
+                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                            {% if messages %}
+                            <div class="messages">
+                            {% for message in messages %}
+                                <div class="error-message">
+                                    {{ message }}
                                 </div>
-                                {% endif %}
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                    <button type="submit" class="btn btn-primary">Добавить</button>
-                                </div>
-                            </form>
-                        </div>
+                            {% endfor %}
+                            </div>
+                            {% endif %}
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Очистить выбор</button>
+                            <button type="submit" class="btn btn-primary">Показать</button>
+                        </form>
                     </div>
                 </div>
+                {% endblock sidebar %}
             </div>
         </div>
-        <div class="collapse" id="collapseExample">
-            <h3 class="mt-4">Участки</h3>
-            <div class="card card-body">
-                <div class="row">
-            <div class="col">
-                {% block cameras_table %}
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Название</th>
-                                <th scope="col">Описание</th>
-                                <th scope="col">Камера</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for place in places %}
-                            <tr>
-                                <td>{{ place.name }}</td>
-                                <td>{{ place.description }}</td>
-                                <td>{{ place.camera_id.name }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                {% endblock cameras_table %}
-            </div>
-        </div>
-            </div>
-        </div>
-
         <!--
         <div class="row">
             <div class="col">

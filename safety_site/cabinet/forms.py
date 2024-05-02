@@ -17,7 +17,7 @@ class AddPlaceForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
         super(AddPlaceForm, self).__init__(*args, **kwargs)
-        self.fields['camera_id'].queryset = Camera.objects.filter(user_id=user_id) #values_list("name")
+        self.fields['camera_id'].queryset = Camera.objects.filter(user_id=user_id)
 
     name = forms.CharField(label="Подпись участка", widget=forms.TextInput(attrs={
         'placeholder': 'Введите подпись для участка',
@@ -28,3 +28,13 @@ class AddPlaceForm(forms.Form):
         'class': 'form-control'
     }))
     camera_id = forms.ModelChoiceField(label="Камера участка", queryset=Camera.objects.none())
+
+
+class ShowPlaceForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(ShowPlaceForm, self).__init__(*args, **kwargs)
+        self.fields['places'].choices = Place.objects.filter(user_id=user_id)
+
+    places = forms.ChoiceField(label="Выберите участок", choices=Place.objects.none(), widget=forms.CheckboxInput())

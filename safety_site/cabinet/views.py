@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from cabinet.forms import AddCameraForm, AddPlaceForm
+from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm
 from cabinet.models import Camera, Place
 
 
@@ -32,7 +32,7 @@ def add_cameras(request):
     return render(request, 'cabinet/add_cameras.html', context)
 
 @login_required(login_url="/login/")
-def watch_site(request):
+def add_places(request):
     if request.method == "POST":
         form = AddPlaceForm(request.POST, user_id=request.user)
         if form.is_valid():
@@ -47,7 +47,16 @@ def watch_site(request):
     else:
         form = AddPlaceForm(user_id=request.user)
     places = Place.objects.all()
-    context = {'form': form, "places": places}
+    context = {'form': form, 'places': places}
+    return render(request, 'cabinet/add_place.html', context)
+
+@login_required(login_url="/login/")
+def watch_site(request):
+    if request.method == "POST":
+        form = ShowPlaceForm(request.POST, user_id=request.user)
+    else:
+        form = ShowPlaceForm(user_id=request.user)
+    context = {'form': form}
     return render(request, 'cabinet/watch_site.html', context)
 
 @login_required(login_url="/login/")
