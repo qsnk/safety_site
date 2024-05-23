@@ -14,6 +14,9 @@ class Camera(models.Model):
     url = models.CharField(name="url", max_length=300, null=False, help_text="Введите ссылку для подключения к камере", verbose_name="Ссылка для подключения к камере")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
+    def __str__(self):
+        return f'Камера участка: {self.name}'
+
 
 class Place(models.Model):
     name = models.CharField(name="name", max_length=100, null=False, help_text="Введите название площадки", verbose_name="Название площадки")
@@ -21,6 +24,8 @@ class Place(models.Model):
     camera_id = models.ForeignKey(Camera, on_delete=models.CASCADE, db_column="camera_id", verbose_name="Идентификатор камеры", default=None)
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя", default=None)
 
+    def __str__(self):
+        return f'Участок: {self.name}'
 
 class Violation(models.Model):
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения")
