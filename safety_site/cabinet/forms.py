@@ -31,10 +31,4 @@ class AddPlaceForm(forms.Form):
 
 
 class ShowPlaceForm(forms.Form):
-
-    def __init__(self, *args, **kwargs):
-        user_id = kwargs.pop('user_id', None)
-        super(ShowPlaceForm, self).__init__(*args, **kwargs)
-        self.fields['places'].choices = Place.objects.filter(user_id=user_id)
-
-    places = forms.ChoiceField(label="Выберите участок", choices=Place.objects.none(), widget=forms.CheckboxInput())
+    pass
