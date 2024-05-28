@@ -2,6 +2,7 @@ django
 Pillow
 django-redis==5.4.0
 psycopg2-binary
-numpy
+setuptools
 wheel
 opencv-python
+ultralytics

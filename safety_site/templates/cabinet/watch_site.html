@@ -61,7 +61,10 @@
         </div>
         <div class="row">
             <div class="col">
-                <iframe id="camera1" src="{% url 'stream_video' %}" allow="autoplay" width="640" height="480"> </iframe>
+<!--                <iframe allow="autoplay" id="camera1" src="{% url 'stream_video' %}" width="640" height="480"> </iframe>-->
+                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
+                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
+                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
                 <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
 <!--                <video-->
 <!--                    id="my-video"-->
@@ -69,11 +72,11 @@
 <!--                    controls-->
 <!--                    preload="auto"-->
 <!--                    width="640"-->
-<!--                    height="264"-->
+<!--                    height="480"-->
 <!--                    poster=""-->
 <!--                    data-setup="{}"-->
 <!--                >-->
-<!--                    <source src="" type="video/mp4" />-->
+<!--                    <source src="{% url 'stream_video' %}" type="video/mp4" />-->
 <!--                </video>-->
             </div>
         </div>

@@ -6,7 +6,6 @@ from django.http.response import StreamingHttpResponse, HttpResponse
 from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm
 from cabinet.models import Camera, Place, Violation
 from cabinet.camera import IpCamera
-import cv2
 
 
 # Create your views here.
@@ -85,10 +84,9 @@ def watch_site_add(request):
     })
 
 def stream_video(request):
-    cameras = Camera.objects.filter(user_id=request.user)
-    camera = IpCamera(request, cameras[3].pk)
-    print(camera.camera)
-    print(camera.url)
+    chosen_camera = Camera.objects.filter(user_id=request.user)[0]
+    url = chosen_camera.url
+    camera = IpCamera(url)
     return StreamingHttpResponse(generate_frames(camera), content_type='multipart/x-mixed-replace; boundary=frame')
 
 @login_required(login_url="/login/")
@@ -106,12 +104,7 @@ def statistics(request):
     return render(request, 'cabinet/statistics.html')
 
 def generate_frames(camera):
-    capture = cv2.VideoCapture(camera.url)
-    print(capture.isOpened())
-    while capture.isOpened():
-        ret, frame = capture.read()
-        img = cv2.imdecode(frame, 1)
-        resize = cv2.resize(img, (640, 480), interpolation=cv2.INTER_LINEAR)
-        _, jpeg = cv2.imencode('.jpg', resize)
-        frame = jpeg.tobytes()
-        yield b'--frame\r\n'b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n'
+    while camera.capture.isOpened():
+        frame = camera.get_frame()
+        yield (b'--frame\r\n'
+				b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
