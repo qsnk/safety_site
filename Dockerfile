@@ -1,4 +1,4 @@
-FROM python:3.10-alpine
+FROM python:3.10
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -6,12 +6,9 @@ ENV PYTHONUNBUFFERED 1
 COPY requirements.txt /tmp/requirements.txt
 COPY entrypoint.sh /tmp/entrypoint.sh
 
-RUN apk add postgresql-client build-base postgresql-dev
-RUN apk add linux-headers
-#RUN apk add musl-dev
-#RUN apk add gfortran
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 
-RUN pip install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip
 RUN pip install -r /tmp/requirements.txt
 
 RUN chmod 777 /tmp/entrypoint.sh
