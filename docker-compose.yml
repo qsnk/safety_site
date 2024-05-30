@@ -57,11 +57,21 @@ services:
       - ./static:/static
       - ./media:/media
       - ./uploads:/uploads
+      - ./neural_networks:/neural_networks
       - ./nginx/:/etc/nginx/conf.d/:ro
     depends_on:
       - app
     networks:
       - default
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    command: >
+      sh -c "redis-server"
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
 
 
 volumes:
