@@ -1,7 +1,9 @@
+import cv2
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
+from django.core.cache import cache
 from django.http.response import StreamingHttpResponse, HttpResponse
 from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm
 from cabinet.models import Camera, Place, Violation
@@ -70,7 +72,18 @@ def add_places(request):
 @login_required(login_url="/login/")
 def watch_site(request):
     places = Place.objects.filter(user_id=request.user)
-    context = {'places': places}
+    if request.method == "POST":
+        sites = request.POST.getlist("checkboxes")
+        cache.set('sites', sites, 60 * 60 * 24)
+        print(sites)
+    else:
+        sites_cache = cache.get('sites')
+        if sites_cache is not None:
+            sites = sites_cache
+        else:
+            sites = None
+        cache.set('sites', sites, 60 * 60)
+    context = {'places': places, 'sites': sites}
     return render(request, 'cabinet/watch_site.html', context)
 
 def watch_site_add(request):
@@ -83,8 +96,19 @@ def watch_site_add(request):
             "showMessage": "Places shown"
     })
 
+def watch_site_start(request):
+    pass
+
+def watch_site_stop(request):
+    cv2.VideoCapture().release()
+    return HttpResponse(
+        status=200,
+        headers={
+            "showMessage": "Cameras stoped"
+        })
+
 def stream_video(request):
-    chosen_camera = Camera.objects.filter(user_id=request.user)[0]
+    chosen_camera = Camera.objects.filter(user_id=request.user)[1]
     url = chosen_camera.url
     camera = IpCamera(url)
     return StreamingHttpResponse(generate_frames(camera), content_type='multipart/x-mixed-replace; boundary=frame')

@@ -16,17 +16,27 @@
             <div class="col">
                 {% block watch %}
                 <h2>Смотреть площадку</h2>
-
+                {% if sites %}
+                <p>Выбрана площадка: {{ sites }}</p>
+                {% else %}
+                <p>Площадка не выбрана</p>
+                {% endif %}
                 {% endblock watch %}
             </div>
             <div class="col col-auto">
                 {% block sidebar %}
+                <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_start' %}'">
+                    Запустить
+                </button>
+                <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_stop' %}'">
+                    Остановить
+                </button>
                 <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
                     Фильтры
                 </button>
                 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
                     <div class="offcanvas-header">
-                        <h5 id="offcanvasStartLabel">Выбрать участок</h5>
+                        <h5 id="offcanvasStartLabel">Выбрать площадку</h5>
                         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                     </div>
                     <div class="offcanvas-body">
@@ -35,7 +45,7 @@
                             {% for place in places %}
                             <div class="row">
                                 <div class="col col-auto">
-                                    <input type='checkbox' class="form-check-input" name="{{ place.pk }}" value="{{place.pk }}">
+                                    <input type='checkbox' class="form-check-input" name="checkboxes" value="{{place.pk }}">
                                 </div>
                                 <div class="col">
                                     {{ place.name }}
@@ -62,9 +72,6 @@
         <div class="row">
             <div class="col">
 <!--                <iframe allow="autoplay" id="camera1" src="{% url 'stream_video' %}" width="640" height="480"> </iframe>-->
-                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
-                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
-                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
                 <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
 <!--                <video-->
 <!--                    id="my-video"-->

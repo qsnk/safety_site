@@ -14,6 +14,9 @@ RUN pip install -r /tmp/requirements.txt
 RUN chmod 777 /tmp/entrypoint.sh
 
 COPY safety_site /app
+COPY Lap/lap /usr/local/lib/python3.10/site-packages/lap
+COPY Lap/lap-0.4.0.dist-info /usr/local/lib/python3.10/site-packages/lap-0.4.0.dist-info
+
 WORKDIR /app
 EXPOSE 8000
 
