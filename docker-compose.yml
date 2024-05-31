@@ -57,6 +57,7 @@ services:
       - ./static:/static
       - ./media:/media
       - ./uploads:/uploads
+      - ./detections:/detections
       - ./neural_networks:/neural_networks
       - ./nginx/:/etc/nginx/conf.d/:ro
     depends_on:

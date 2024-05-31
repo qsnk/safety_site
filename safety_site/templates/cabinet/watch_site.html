@@ -14,97 +14,99 @@
     <div class="container mt-4">
         <div class="row">
             <div class="col">
-                {% block watch %}
-                <h2>Смотреть площадку</h2>
-                {% if sites %}
-                <p>Выбрана площадка: {{ sites }}</p>
-                {% else %}
-                <p>Площадка не выбрана</p>
-                {% endif %}
-                {% endblock watch %}
-            </div>
-            <div class="col col-auto">
-                {% block sidebar %}
-                <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_start' %}'">
-                    Запустить
-                </button>
-                <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_stop' %}'">
-                    Остановить
-                </button>
-                <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
-                    Фильтры
-                </button>
-                <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
-                    <div class="offcanvas-header">
-                        <h5 id="offcanvasStartLabel">Выбрать площадку</h5>
-                        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                <div class="row">
+                    {% block watch %}
+                    <h2>Смотреть площадку</h2>
+                    {% if sites %}
+                    <p>Выбранные площадки(а):</p>
+                    {% for id, name in sites.items %}
+                        <p> {{ name }} </p>
+                    {% endfor%}
+                    {% else %}
+                    <p><i>Площадка не выбрана</i></p>
+                    {% endif %}
+                    {% endblock watch %}
+                </div>
+                <div class="row">
+                    {% if sites %}
+                    <div class="row">
+                        <div class="col col-auto">
+                            <img src="{% url 'stream_video' %}" alt="Загрузка изображения..." width="640" height="480">
+                        </div>
                     </div>
-                    <div class="offcanvas-body">
-                        <form method="post">
-                            {% csrf_token %}
-                            {% for place in places %}
-                            <div class="row">
-                                <div class="col col-auto">
-                                    <input type='checkbox' class="form-check-input" name="checkboxes" value="{{place.pk }}">
+                    {% else %}
+                    <div class="row mt-4 d-flex">
+                        <div class="col d-flex justify-content-center">
+                            <svg width="480" height="360" viewBox="0 0 480 360" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M224.214 164.347C228.629 164.347 232.207 160.844 232.207 156.521C232.207 152.199 228.629 148.695 224.214 148.695C219.8 148.695 216.221 152.199 216.221 156.521C216.221 160.844 219.8 164.347 224.214 164.347Z" fill="black"/>
+                                <path d="M256.187 164.347C260.601 164.347 264.18 160.844 264.18 156.521C264.18 152.199 260.601 148.695 256.187 148.695C251.772 148.695 248.194 152.199 248.194 156.521C248.194 160.844 251.772 164.347 256.187 164.347Z" fill="black"/>
+                                <path d="M192.242 164.347C196.657 164.347 200.235 160.844 200.235 156.521C200.235 152.199 196.657 148.695 192.242 148.695C187.828 148.695 184.249 152.199 184.249 156.521C184.249 160.844 187.828 164.347 192.242 164.347Z" fill="black"/>
+                                <path d="M455.309 195.652H440.738C427.126 195.652 416.056 206.491 416.056 219.819V250.435H336.125V201.764C365.268 192.553 383.74 154.401 383.74 101.739C383.74 45.1174 362.406 5.22 329.387 0.0939137C328.971 0.031305 328.556 0 328.132 0H8.40987C4.56521 0 1.27207 2.68435 0.560691 6.38609H0.552697C0.392836 7.22348 -3.22002 27.1096 10.4881 43.2783C19.5842 54.0078 33.8278 60.253 52.7873 62.0217C49.9338 74.4652 48.3751 87.9261 48.3751 101.739C48.3751 158.791 72.9538 203.478 104.327 203.478H272.181V304.959C272.181 318.044 283.051 328.696 296.424 328.696H311.89C322.345 328.696 331.193 322.145 334.59 313.043H416.064V335.833C416.064 349.161 427.134 360 440.746 360H455.317C468.93 360 480 349.161 480 335.833V219.819C479.992 206.491 468.922 195.652 455.309 195.652ZM327.453 15.6522C346.612 19.0643 365.723 44.4756 367.562 93.913H203.544L173.914 64.9017C172.411 63.4304 170.381 62.6087 168.263 62.6087H152.277H149.487H117.635H109.082C109.01 62.4991 108.923 62.3896 108.851 62.28C108.035 60.9965 107.124 59.7052 106.133 58.4061C105.597 57.7017 104.998 56.9974 104.414 56.293C104.151 55.9722 103.903 55.6513 103.631 55.3304C103.311 54.9626 102.984 54.5948 102.648 54.227C102.296 53.8357 102.009 53.4522 101.649 53.0609C101.513 52.9122 101.337 52.8104 101.185 52.6696C100.29 51.7226 99.3548 50.7757 98.3717 49.8209C97.7402 49.2104 97.1008 48.6078 96.4454 48.0052C94.8547 46.5496 93.1762 45.0861 91.3858 43.6226C89.947 42.4409 88.4443 41.2904 86.9256 40.14C86.2302 39.6157 85.5428 39.0913 84.8235 38.567C72.73 29.7157 58.7261 21.8661 46.0891 15.6522H327.453ZM112.312 91.2991C112.312 107.656 107.516 118.463 104.319 123.175C101.121 118.456 96.3255 107.656 96.3255 91.2991C96.3255 84.9913 97.0209 79.6461 98.004 75.2322C98.036 75.2791 98.0999 75.2948 98.1399 75.3339C98.8113 76.14 99.6266 76.7739 100.554 77.2591C100.754 77.3609 100.945 77.4391 101.161 77.5252C102.152 77.9478 103.199 78.2452 104.327 78.2452H111.217C111.944 82.4243 112.312 86.7913 112.312 91.2991ZM22.8933 33.4174C19.0406 28.9252 17.3301 23.8852 16.5708 19.5417C28.6243 24.613 44.6184 32.1104 59.3656 40.7974C58.5823 42.7226 57.8629 44.7183 57.1595 46.7374C41.1414 45.7357 29.6394 41.267 22.8933 33.4174ZM64.3532 101.739C64.3532 82.7843 67.4066 64.6043 73.0337 49.5313C73.1936 49.6409 73.3534 49.7504 73.5133 49.86C78.445 53.3426 82.5694 56.7391 86.1103 60.0574C83.3048 66.7957 80.3314 77.2513 80.3314 91.2991C80.3314 117.704 91.5376 140.862 104.311 140.862C117.083 140.862 128.29 117.704 128.29 91.2991C128.29 86.8304 127.906 82.4948 127.299 78.253H142.645C143.724 85.9852 144.276 93.8583 144.276 101.731C144.276 150.214 122.79 187.818 104.311 187.818C85.4229 187.826 64.3532 152.468 64.3532 101.739ZM133.677 187.826C133.901 187.568 134.101 187.239 134.324 186.973C135.851 185.165 137.33 183.224 138.753 181.166C138.992 180.822 139.24 180.524 139.48 180.172C141.119 177.723 142.669 175.085 144.156 172.323C144.556 171.587 144.915 170.797 145.299 170.037C146.37 167.917 147.393 165.733 148.368 163.463C148.784 162.493 149.192 161.515 149.591 160.521C150.542 158.142 151.422 155.684 152.261 153.164C152.533 152.335 152.836 151.537 153.092 150.699C154.139 147.334 155.082 143.875 155.922 140.306C156.09 139.594 156.209 138.858 156.369 138.146C157.001 135.243 157.568 132.284 158.056 129.263C158.248 128.05 158.415 126.83 158.591 125.609C158.967 122.877 159.279 120.107 159.527 117.305C159.63 116.116 159.758 114.934 159.838 113.729C160.11 109.784 160.286 105.793 160.286 101.739V78.2609H164.97L194.6 107.272C196.103 108.743 198.133 109.565 200.251 109.565H367.578C365.739 159.003 346.628 184.414 327.469 187.826H272.189H133.677ZM311.882 313.043H296.416C291.867 313.043 288.159 309.42 288.159 304.959V203.478H320.131V250.435V304.959C320.131 309.412 316.43 313.043 311.882 313.043ZM336.117 297.391V266.087H416.048V297.391H336.117ZM464.006 335.825C464.006 340.521 460.105 344.34 455.309 344.34H440.738C435.942 344.34 432.042 340.521 432.042 335.825V313.036V250.427V219.811C432.042 215.116 435.942 211.297 440.738 211.297H455.309C460.105 211.297 464.006 215.116 464.006 219.811V335.825Z" fill="black"/>
+                                <line x1="7.5" y1="-7.5" x2="580.654" y2="-7.5" transform="matrix(-0.80335 0.595507 -0.595497 -0.803358 472.494 0.299805)" stroke="black" stroke-width="15" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col col-auto d-flex justify-content-center">
+                {% block sidebar %}
+                <div class="row d-flex justify-content-center">
+                    <div class="col">
+                       <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_start' %}'">
+                            Запустить
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_stop' %}'">
+                            Остановить
+                        </button>
+                    </div>
+                    <div class="col">
+                        <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
+                            Фильтры
+                        </button>
+                    </div>
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
+                        <div class="offcanvas-header">
+                            <h5 id="offcanvasStartLabel">Выбрать площадку</h5>
+                            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                {% for place in places %}
+                                <div class="row">
+                                    <div class="col col-auto">
+                                        <input type='checkbox' class="form-check-input" name="checkboxes" value="{{place.pk }}">
+                                    </div>
+                                    <div class="col">
+                                        {{ place.name }}
+                                    </div>
                                 </div>
-                                <div class="col">
-                                    {{ place.name }}
+                                {% endfor %}
+                                {% if messages %}
+                                <div class="messages">
+                                {% for message in messages %}
+                                    <div class="error-message">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
                                 </div>
-                            </div>
-                            {% endfor %}
-                            {% if messages %}
-                            <div class="messages">
-                            {% for message in messages %}
-                                <div class="error-message">
-                                    {{ message }}
-                                </div>
-                            {% endfor %}
-                            </div>
-                            {% endif %}
-                            <button type="button" class="btn btn-secondary mt-4" id="clean_inputs">Очистить выбор</button>
-                            <button type="submit" class="btn btn-primary mt-4" onclick="location.href='{% url 'watch_site_add' %}'">Показать</button>
-                        </form>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
+                                <button type="submit" class="btn btn-outline-dark mt-4" onclick="location.href='{% url 'watch_site_add' %}'">Показать</button>
+                            </form>
+                        </div>
+                    </div>
                     </div>
                 </div>
                 {% endblock sidebar %}
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-<!--                <iframe allow="autoplay" id="camera1" src="{% url 'stream_video' %}" width="640" height="480"> </iframe>-->
-                <img src="{% url 'stream_video' %}" alt="Image" width="640" height="480">
-<!--                <video-->
-<!--                    id="my-video"-->
-<!--                    class="video-js"-->
-<!--                    controls-->
-<!--                    preload="auto"-->
-<!--                    width="640"-->
-<!--                    height="480"-->
-<!--                    poster=""-->
-<!--                    data-setup="{}"-->
-<!--                >-->
-<!--                    <source src="{% url 'stream_video' %}" type="video/mp4" />-->
-<!--                </video>-->
-            </div>
-        </div>
-        <!--
-        <div class="row">
-            <div class="col">
-                <div class="camera">
-                    <iframe id="camera1" src="http://77.222.181.11:8080/mjpg/video.mjpg" allow="autoplay" width="800" height="600"> </iframe>
-                    <source src = "http://77.222.181.11:8080/mjpg/video.mjpg" type = "video/mp4">
-                    <button class="btn btn-outline-primary" id="playbtn">Play</button>
-                    <button class="btn btn-outline-primary" id="pausebtn">Pause</button>
-                    <script>
-
-                    </script>
-                </div>
-            </div>
-        </div>-->
     </div>
     <script>
         $('#clean_inputs').click(function (e) {
-            // Iterate each checkbox
             $(':checkbox').each(function () {
                 this.checked = false;
             });
