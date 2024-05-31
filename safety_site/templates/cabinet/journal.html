@@ -20,17 +20,29 @@
                 <div class="col col-auto">
                     {% block sidebar %}
                     <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16">
-                            <path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/>
-                        </svg>
+                        Фильтры
                     </button>
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
                         <div class="offcanvas-header">
-                            <h5 id="offcanvasStartLabel">Фильтр нарушений</h5>
+                            <h5 id="offcanvasStartLabel">Фильтры</h5>
                             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
                         <div class="offcanvas-body">
-                            ...
+                            <form method="post">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+                                {% if messages %}
+                                <div class="messages">
+                                {% for message in messages %}
+                                    <div class="error-message">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                                </div>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
+                                <button type="submit" class="btn btn-outline-dark mt-4">Показать</button>
+                            </form>
                         </div>
                     </div>
                     {% endblock sidebar %}
@@ -84,6 +96,13 @@
                 </ul>
             </nav>
         </div>
+    <script>
+        $('#clean_inputs').click(function (e) {
+            $(':checkbox').each(function () {
+                this.checked = false;
+            });
+        });
+    </script>
     {% endblock content %}
     {% endblock body %}
 </body>

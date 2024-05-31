@@ -28,7 +28,7 @@ class Place(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя", default=None)
 
     def __str__(self):
-        return f'Площадка: {self.name}'
+        return self.name
 
 
 class Violation(models.Model):
@@ -39,7 +39,7 @@ class Violation(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return f'Нарушение: {self.violation_class}'
+        return self.violation_class
 
 
 class Record(models.Model):

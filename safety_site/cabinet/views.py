@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.http.response import StreamingHttpResponse, HttpResponse
-from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm
+from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm
 from cabinet.models import Camera, Place, Violation
 from cabinet.camera import IpCamera
 import cv2
@@ -76,47 +76,43 @@ def add_places(request):
 
 @login_required(login_url="/login/")
 def watch_site(request):
-    places = Place.objects.filter(user_id=request.user)
+    sites_cache = cache.get('sites')
     if request.method == "POST":
-        sites_id = request.POST.getlist("checkboxes")
-        all_sites = Place.objects.all()
-        sites_names = []
-        for id in sites_id:
-            sites_names.append(all_sites.get(pk=id))
-        sites = {key:value for key, value in zip(sites_id, sites_names)}
-        cache.set('sites', sites, 60 * 60 * 24)
-        print(sites)
+        if 'play-button' in request.POST:
+            return stream_video(request)
+
+        if 'stop-button' in request.POST:
+            cache.set('sites', None, 60 * 60)
+            cv2.VideoCapture().release()
+            form = ShowPlaceForm(user_id=request.user)
+            context = {'form': form}
+            return render(request, 'cabinet/watch_site.html', context)
+
+        if 'show-button' in request.POST:
+            form = ShowPlaceForm(request.POST, user_id=request.user)
+            if form.is_valid():
+                choices = form.cleaned_data["places"]
+                if choices is not None:
+                    sites = {place.pk: place.name for place in choices}
+                    cache.set('sites', sites, 60 * 60 * 24)
+                    print(sites)
+                else:
+                    sites = None
+                    cache.set('sites', sites, 60 * 60)
+                form = ShowPlaceForm(user_id=request.user)
+                context = {'form': form, 'sites': sites}
+                return render(request, 'cabinet/watch_site.html', context)
     else:
-        sites_cache = cache.get('sites')
         if sites_cache is not None:
             sites = sites_cache
         else:
             sites = None
+
         cache.set('sites', sites, 60 * 60)
-    context = {'places': places, 'sites': sites}
-    return render(request, 'cabinet/watch_site.html', context)
-
-def watch_site_add(request):
-    for k, v in request.POST.items():
-        places = Place.objects.filter(pk=id)
-        print(k, v)
-    return HttpResponse(
-        status=204,
-        headers={
-            "showMessage": "Places shown"
-    })
-
-def watch_site_start(request):
-    pass
-
-def watch_site_stop(request):
-    cache.set('sites', None, 60 * 60)
-    cv2.VideoCapture().release()
-    return HttpResponse(
-        status=204,
-        headers={
-            "showMessage": "Processing stopped"
-        })
+        form = ShowPlaceForm(user_id=request.user)
+        places = Place.objects.filter(user_id=request.user)
+        context = {'places': places, 'sites': sites, 'form': form}
+        return render(request, 'cabinet/watch_site.html', context)
 
 def stream_video(request):
     sites_cached = cache.get('sites')
@@ -126,18 +122,36 @@ def stream_video(request):
         url = chosen_camera.url
         camera = IpCamera(url)
         return StreamingHttpResponse(generate_frames(request, camera), content_type='multipart/x-mixed-replace; boundary=frame')
-
+    else:
+        sites = None
+        cache.set('sites', sites, 60 * 60)
+        form = ShowPlaceForm(user_id=request.user)
+        places = Place.objects.filter(user_id=request.user)
+        context = {'sites': sites, 'form': form, 'places': places}
+        return render(request, 'cabinet/watch_site.html', context)
 @login_required(login_url="/login/")
 def reports(request):
     return render(request, 'cabinet/reports.html')
 
 @login_required(login_url="/login/")
 def journal(request):
+    if request.method == "POST":
+        form = FilterJournalForm(request.POST)
+        if form.is_valid():
+            date = form.cleaned_data["date"]
+            time = form.cleaned_data["time"]
+            violation_classes = form.cleaned_data["violations"]
+            print(date, time, violation_classes)
+        else:
+            print("Invalid data!")
+            messages.error(request, "Invalid data!")
+
+    form = FilterJournalForm()
     violations = Violation.objects.all()
-    paginator = Paginator(violations, 5)
+    paginator = Paginator(violations, 20)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    context = {'violations': violations, 'page': page}
+    context = {'violations': violations, 'form': form, 'page': page}
     return render(request, 'cabinet/journal.html', context)
 
 @login_required(login_url="/login/")
