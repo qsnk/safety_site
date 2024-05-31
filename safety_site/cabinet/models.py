@@ -28,14 +28,14 @@ class Place(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя", default=None)
 
     def __str__(self):
-        return f'Участок: {self.name}'
+        return f'Площадка: {self.name}'
 
 
 class Violation(models.Model):
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения")
     violation_class = models.CharField(name="violation_class", max_length=100, null=False, help_text="Введите название нарушения", verbose_name="Название нарушения")
     description = models.CharField(max_length=200, null=True, help_text="Введите описание нарушения", verbose_name="Описание нарушения")
-    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='product/')
+    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='static/images/')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):

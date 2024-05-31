@@ -4,7 +4,7 @@
 ## Initialization
 *add .env file to root folder*
 
-File looks like:
+File structure looks like:
 * *SECRET_KEY*=**value**
 * *POSTGRES_HOST*=**value**
 * *POSTGRES_DB*=**value**
