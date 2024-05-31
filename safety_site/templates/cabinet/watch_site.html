@@ -5,6 +5,13 @@
     {% block head %}
         {{ block.super }}
         <title>{% block title %} Смотреть площадку {% endblock title %}</title>
+        <style>
+            button:hover{
+                svg{
+                    fill: white;
+                }
+            }
+        </style>
     {% endblock head %}
 </head>
 <body>
@@ -52,21 +59,28 @@
             <div class="col col-auto d-flex justify-content-center">
                 {% block sidebar %}
                 <div class="row d-flex justify-content-center">
-                    <div class="col">
-                       <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_start' %}'">
-                            Запустить
-                        </button>
-                    </div>
-                    <div class="col">
-                        <button class="btn btn-outline-dark" type="button" onclick="location.href='{% url 'watch_stop' %}'">
-                            Остановить
-                        </button>
-                    </div>
-                    <div class="col">
-                        <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
-                            Фильтры
-                        </button>
-                    </div>
+                    <form class="d-flex" method="post">
+                        {% csrf_token %}
+                        <div class="col">
+                           <button class="btn btn-outline-dark" type="submit" value="play" name="play-button">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="black" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M11.5964 8.69663L5.23279 12.3885C4.6925 12.7019 4 12.3228 4 11.6922L4 4.30846C4 3.67783 4.6925 3.29871 5.23279 3.61216L11.5964 7.30403C12.1345 7.6162 12.1345 8.38445 11.5964 8.69663Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark" type="submit" value="stop" name="stop-button">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="black" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 3.5H11C11.8284 3.5 12.5 4.17157 12.5 5V11C12.5 11.8284 11.8284 12.5 11 12.5H5C4.17157 12.5 3.5 11.8284 3.5 11V5C3.5 4.17157 4.17157 3.5 5 3.5Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
+                                Фильтры
+                            </button>
+                        </div>
+                    </form>
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
                         <div class="offcanvas-header">
                             <h5 id="offcanvasStartLabel">Выбрать площадку</h5>
@@ -75,16 +89,7 @@
                         <div class="offcanvas-body">
                             <form method="post">
                                 {% csrf_token %}
-                                {% for place in places %}
-                                <div class="row">
-                                    <div class="col col-auto">
-                                        <input type='checkbox' class="form-check-input" name="checkboxes" value="{{place.pk }}">
-                                    </div>
-                                    <div class="col">
-                                        {{ place.name }}
-                                    </div>
-                                </div>
-                                {% endfor %}
+                                {{ form.as_p }}
                                 {% if messages %}
                                 <div class="messages">
                                 {% for message in messages %}
@@ -95,10 +100,9 @@
                                 </div>
                                 {% endif %}
                                 <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
-                                <button type="submit" class="btn btn-outline-dark mt-4" onclick="location.href='{% url 'watch_site_add' %}'">Показать</button>
+                                <button type="submit" class="btn btn-outline-dark mt-4" name="show-button">Показать</button>
                             </form>
                         </div>
-                    </div>
                     </div>
                 </div>
                 {% endblock sidebar %}
@@ -112,7 +116,6 @@
             });
         });
     </script>
-    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
     {% endblock content %}
     {% endblock body %}
 </body>

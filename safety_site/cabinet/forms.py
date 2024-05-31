@@ -1,5 +1,5 @@
 from django import forms
-from cabinet.models import Place, Camera
+from cabinet.models import Place, Camera, Violation
 
 
 class AddCameraForm(forms.Form):
@@ -31,4 +31,21 @@ class AddPlaceForm(forms.Form):
 
 
 class ShowPlaceForm(forms.Form):
-    pass
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(ShowPlaceForm, self).__init__(*args, **kwargs)
+        self.fields['places'].queryset = Place.objects.filter(user_id=user_id)
+    places = forms.ModelMultipleChoiceField(label='Площадки', queryset=Place.objects.none(), widget=forms.CheckboxSelectMultiple(attrs={}))
+
+class FilterJournalForm(forms.Form):
+    date = forms.DateField(label='Дата', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
+        'class': 'form-control',
+        'type': 'time'
+    }))
+    violations = forms.ModelMultipleChoiceField(label='Класс нарушения', queryset=Violation.objects.order_by('violation_class').distinct('violation_class'), widget=forms.CheckboxSelectMultiple(attrs={
+        'type': 'checkbox'
+    }))
