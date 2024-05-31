@@ -55,22 +55,22 @@
                     <div class="row">
                         <div class="col">
                             {% block cameras_table %}
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Название</th>
-                                            <th scope="col">Ссылка</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    {% for camera in page %}
-                                        <tr>
-                                            <td>{{ camera.name }}</td>
-                                            <td>{{ camera.url }}</td>
-                                        </tr>
-                                    {% endfor %}
-                                    </tbody>
-                                </table>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Название</th>
+                                        <th scope="col">Ссылка</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                {% for camera in page %}
+                                <tr>
+                                    <td>{{ camera.name }}</td>
+                                    <td>{{ camera.url }}</td>
+                                </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
                             {% endblock cameras_table %}
                         </div>
                     </div>
