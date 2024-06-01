@@ -54,19 +54,21 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th scope="col">Дата / Время</th>
+                                <th scope="col">Дата</th>
+                                <th scope="col">Время</th>
                                 <th scope="col">Нарушение</th>
                                 <th scope="col">Описание</th>
                                 <th scope="col">Фото</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-group-divider">
                             {% for violation in page %}
                             <tr>
-                              <td>{{ violation.date_time }}</td>
-                              <td>{{ violation.violation_class }}</td>
-                              <td>{{ violation.description }}</td>
-                              <td><a href="{{ violation.photo.url }}"><img class="img-fluid rounded" width="100" height="100" src="{{ violation.photo.url }}" alt="{{ violation.photo.url }}"></a></td>
+                                <td>{{ violation.date_time.date }}</td>
+                                <td>{{ violation.date_time.time }}</td>
+                                <td>{{ violation.violation_class }}</td>
+                                <td>{{ violation.description }}</td>
+                                <td><a href="{{ violation.photo.url }}"><img class="img-fluid rounded" width="100" height="100" src="{{ violation.photo.url }}" alt="{{ violation.photo.url }}"></a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -81,15 +83,23 @@
                     {% else %}
                         <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
                     {% endif %}
-                    {% for button in page.paginator.page_range %}
-                        {% if page.number == button %}
-                            <li class="page-item active"><a class="page-link" href="#">{{ page.number }}</a></li>
-                        {% else %}
-                            <li class="page-item"><a class="page-link" href="?page={{ button }}">{{ button }}</a></li>
-                        {% endif %}
-                    {% endfor %}
+                    {% if page.paginator.num_pages > 10 %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ page.number }}</a></li>
+                    {% else %}
+                        {% for button in page.paginator.page_range %}
+                            {% if page.number == button %}
+                                <li class="page-item active"><a class="page-link" href="#">{{ page.number }}</a></li>
+                            {% else %}
+                                <li class="page-item"><a class="page-link" href="?page={{ button }}">{{ button }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
                     {% if page.has_next %}
-                        <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">&raquo</a></li>
+                        {% if violation_classes != None %}
+                            <li class="page-item"><a class="page-link" href="?violations={{ violation_classes }}&page={{ page.next_page_number }}">&raquo</a></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">&raquo</a></li>
+                        {% endif %}
                     {% else %}
                         <li class="page-item disabled"><a class="page-link" href="#">&raquo</a></li>
                     {% endif %}
@@ -97,8 +107,14 @@
             </nav>
         </div>
     <script>
-        $('#clean_inputs').click(function (e) {
-            $(':checkbox').each(function () {
+        $('#clean_inputs').click(function() {
+            $('input[type="date"]').each(function() {
+               $(this).val('');
+            });
+            $('input[type="time"]').each(function() {
+               $(this).val('');
+            });
+            $(':checkbox').each(function() {
                 this.checked = false;
             });
         });

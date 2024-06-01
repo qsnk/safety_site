@@ -1,11 +1,16 @@
+from datetime import datetime
+
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.cache import cache
 from django.core.paginator import Paginator
+from django.db.models import Count, Q
+from django.db.models.functions import TruncMonth
+from django.utils.dateformat import DateFormat
 from django.http.response import StreamingHttpResponse, HttpResponse
-from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm
-from cabinet.models import Camera, Place, Violation
+from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm
+from cabinet.models import Camera, Place, Violation, Report
 from cabinet.camera import IpCamera
 import cv2
 
@@ -129,34 +134,102 @@ def stream_video(request):
         places = Place.objects.filter(user_id=request.user)
         context = {'sites': sites, 'form': form, 'places': places}
         return render(request, 'cabinet/watch_site.html', context)
-@login_required(login_url="/login/")
-def reports(request):
-    return render(request, 'cabinet/reports.html')
 
 @login_required(login_url="/login/")
 def journal(request):
+    violations = Violation.objects.all()
+    date = None
+    time = None
+    violation_classes = None
     if request.method == "POST":
         form = FilterJournalForm(request.POST)
         if form.is_valid():
-            date = form.cleaned_data["date"]
-            time = form.cleaned_data["time"]
+            date_start = form.cleaned_data["date_start"]
+            date_end = form.cleaned_data["date_end"]
+            time_start = form.cleaned_data["time_start"]
+            time_end = form.cleaned_data["time_end"]
             violation_classes = form.cleaned_data["violations"]
-            print(date, time, violation_classes)
+            print(date_start, date_end, time_start, time_end, violation_classes)
+
+            if date_start:
+                violations = Violation.objects.filter(date_time__date=date_start)
+                print(violations)
+            if date_end:
+                violations = Violation.objects.filter(date_time__date=date_end)
+                print(violations)
+            if date_start and date_end:
+                violations = Violation.objects.filter(date_time__range=[date_start, date_end])
+
+            if time_start:
+                violations = Violation.objects.filter(date_time__time=time_start)
+                print(violations)
+            if time_end:
+                violations = Violation.objects.filter(date_time__time=time_end)
+                print(violations)
+            if time_start and time_end:
+                violations = Violation.objects.filter(date_time__range=[time_start, time_end])
+
+            if violation_classes:
+                violations = Violation.objects.filter(violation_class__in=list(violation_classes))
+                print(violations)
+
         else:
             print("Invalid data!")
             messages.error(request, "Invalid data!")
 
     form = FilterJournalForm()
-    violations = Violation.objects.all()
     paginator = Paginator(violations, 20)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    context = {'violations': violations, 'form': form, 'page': page}
+    context = {
+        'violations': violations,
+        'form': form,
+        'page': page,
+        'date': date,
+        'time': time,
+        'violation_classes': violation_classes
+    }
     return render(request, 'cabinet/journal.html', context)
 
 @login_required(login_url="/login/")
+def reports(request):
+    reports = Report.objects.all()
+
+    if request.method == "POST":
+        if 'add-report-button' in request.POST:
+            form = AddReportForm(request.POST, user_id=request.user)
+            if form.is_valid():
+                name = form.cleaned_data["name"]
+                date_time = datetime.now()
+                violation_id = form.cleaned_data["violation"]
+                user_id = request.user
+                report = Report(name=name, date_time=date_time, violation_id=violation_id, user_id=user_id)
+                report.save()
+
+    form = AddReportForm(user_id=request.user)
+    paginator = Paginator(reports, 10)
+    page_number = request.GET.get('page')
+    page = paginator.get_page(page_number)
+    context = {
+        'reports': reports,
+        'page': page,
+        'form': form,
+    }
+    return render(request, 'cabinet/reports.html', context)
+
+@login_required(login_url="/login/")
 def statistics(request):
-    return render(request, 'cabinet/statistics.html')
+    violations = Violation.objects.all()
+    violations_count = len(violations)
+    months = Violation.objects.annotate(month=TruncMonth('date_time')).values('month').annotate(count=Count('id')).order_by('month')
+    data = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
+    print(data)
+    context = {
+        'violations': violations,
+        'violations_count': violations_count,
+        'data': data
+    }
+    return render(request, 'cabinet/statistics.html', context)
 
 def generate_frames(request, camera):
     while camera.capture.isOpened():

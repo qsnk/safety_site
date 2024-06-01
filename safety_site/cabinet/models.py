@@ -32,37 +32,21 @@ class Place(models.Model):
 
 
 class Violation(models.Model):
-    date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения")
+    date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения", null=False, help_text="Введите дату и время нарушения")
     violation_class = models.CharField(name="violation_class", max_length=100, null=False, help_text="Введите название нарушения", verbose_name="Название нарушения")
     description = models.CharField(max_length=200, null=True, help_text="Введите описание нарушения", verbose_name="Описание нарушения")
     photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='static/images/')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return self.violation_class
-
-
-class Record(models.Model):
-    date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время записи")
-    violation = models.ForeignKey(Violation, on_delete=models.CASCADE, db_column="violation_id", verbose_name="Идентификатор нарушения")
-
-    def __str__(self):
-        return f'Запись журнала за {self.date_time}'
-
+        return f'Нарушение: {self.violation_class} за {self.date_time.strftime("%d-%m-%Y %H:%M")}'
 
 class Report(models.Model):
+    name = models.CharField(name="name", max_length=200, null=False, help_text="Введите название отчета", verbose_name="Название отчета")
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время формирования отчета")
-    record_id = models.ForeignKey(Record, on_delete=models.CASCADE, db_column="record_id", verbose_name="Идентификатор записи")
-    file = models.FileField(name="file", upload_to="reports/")
+    violation_id = models.ForeignKey(Violation, on_delete=models.CASCADE, default=None, db_column="violation_id", verbose_name="Идентификатор нарушения")
+    file = models.FileField(name="file", null=True, blank=True, verbose_name="Файл", upload_to="uploads/")
+    user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", default=1, verbose_name="Идентификатор пользователя")
 
     def __str__(self):
         return f'Отчет за {self.date_time}'
-
-
-class Statistic(models.Model):
-    period = models.DurationField(name="period")
-    violations = models.CharField(name="violations", max_length=500, null=False, verbose_name="Нарушения")
-    counter = models.IntegerField(name="number_of_violations", null=False, help_text="Введите количество нарушений", verbose_name="Количество нарушений")
-
-    def __str__(self):
-        return f'Статистика за {self.period}'
