@@ -1,5 +1,5 @@
 from django.contrib import admin
-from cabinet.models import NeuralNetwork, Camera, Place, Violation, Record, Report, Statistic
+from cabinet.models import NeuralNetwork, Camera, Place, Violation, Report
 
 # Register your models here.
 
@@ -23,16 +23,6 @@ class ViolationAdmin(admin.ModelAdmin):
     list_display = ["date_time", "violation_class", "description", "photo", "user_id"]
 
 
-@admin.register(Record)
-class RecordAdmin(admin.ModelAdmin):
-    list_display = ["date_time", "violation"]
-
-
 @admin.register(Report)
 class ReportAdmin(admin.ModelAdmin):
-    list_display = ["date_time", "record_id", "file"]
-
-
-@admin.register(Statistic)
-class StatisticAdmin(admin.ModelAdmin):
-    list_display = ["period", "violations", "number_of_violations"]
+    list_display = ["date_time", "violation_id", "file"]

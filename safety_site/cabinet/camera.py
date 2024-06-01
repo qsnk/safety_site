@@ -1,15 +1,19 @@
 from cabinet.models import NeuralNetwork, Violation
 import cv2, ultralytics, time, os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+
 
 
 class IpCamera(object):
     def __init__(self, url):
         self.url = url
-        self.capture = cv2.VideoCapture(self.url)   # "static/video/video.mp4"  self.url
+        self.capture = cv2.VideoCapture("static/video/video.mp4")   # "static/video/video.mp4"  self.url
         self.model = ultralytics.YOLO(NeuralNetwork.objects.get(pk=len(NeuralNetwork.objects.all())).file.url[1:])  # "yolov8n.pt"
         self.violations = ['no vest', 'no helmet', 'no boots', 'no glove']
         print(self.capture.isOpened())
+        print(datetime.now())
+        print(datetime.now().strftime('%d.%m.%Y %H:%M:%S'))
 
     def __del__(self):
         self.capture.release()
@@ -40,7 +44,7 @@ class IpCamera(object):
                         pass
 
                 violation = Violation(
-                    date_time=datetime.now(),
+                    date_time=datetime.now().strftime('%y-%m-%d-%H:%M:%S'),
                     violation_class=detection_class,
                     description=description,
                     photo=results[0].save(os.path.join(f'{os.getcwd()[4:]}/static/images/',
