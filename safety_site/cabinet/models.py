@@ -18,7 +18,7 @@ class Camera(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return f'Камера участка: {self.name}'
+        return f'Камера:{self.name}'
 
 
 class Place(models.Model):
@@ -35,7 +35,7 @@ class Violation(models.Model):
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения", null=False, help_text="Введите дату и время нарушения")
     violation_class = models.CharField(name="violation_class", max_length=100, null=False, help_text="Введите название нарушения", verbose_name="Название нарушения")
     description = models.CharField(max_length=200, null=True, help_text="Введите описание нарушения", verbose_name="Описание нарушения")
-    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='static/images/')
+    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='violations/')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
@@ -45,7 +45,7 @@ class Report(models.Model):
     name = models.CharField(name="name", max_length=200, null=False, help_text="Введите название отчета", verbose_name="Название отчета")
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время формирования отчета")
     violation_id = models.ForeignKey(Violation, on_delete=models.CASCADE, default=None, db_column="violation_id", verbose_name="Идентификатор нарушения")
-    file = models.FileField(name="file", null=True, blank=True, verbose_name="Файл", upload_to="uploads/")
+    file = models.FileField(name="file", null=True, blank=True, verbose_name="Файл", upload_to="reports/")
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", default=1, verbose_name="Идентификатор пользователя")
 
     def __str__(self):

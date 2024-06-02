@@ -8,3 +8,5 @@ wheel
 opencv-python
 ultralytics
 lapx
+python-docx
+reportlab
