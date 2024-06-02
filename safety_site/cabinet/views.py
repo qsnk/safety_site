@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.conf import settings
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
@@ -12,7 +11,14 @@ from django.http.response import StreamingHttpResponse, HttpResponse
 from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm
 from cabinet.models import Camera, Place, Violation, Report
 from cabinet.camera import IpCamera
-import cv2
+from reportlab.lib.pagesizes import letter
+from reportlab.lib.units import inch
+from reportlab.pdfgen import canvas
+from PIL import Image
+from docx import Document
+from docx.shared import Inches
+from datetime import datetime
+import cv2, os
 
 # Create your views here.
 @login_required(login_url="/login/")
@@ -203,8 +209,19 @@ def reports(request):
                 date_time = datetime.now()
                 violation_id = form.cleaned_data["violation"]
                 user_id = request.user
-                report = Report(name=name, date_time=date_time, violation_id=violation_id, user_id=user_id)
+                report_filename = f'{name}-{date_time.day}-{date_time.month}-{date_time.year}-{date_time.hour}-{date_time.minute}.pdf'
+                report_file_path = os.path.join('reports', report_filename)
+                file = report_file_path
+                report = Report(name=name, date_time=date_time, violation_id=violation_id, file=file, user_id=user_id)
                 report.save()
+                create_pdf_report(
+                    title=name,
+                    date_time=date_time.strftime('%y-%m-%d-%H:%M:%S'),
+                    violation_object=violation_id,
+                    image_path=violation_id.photo.url,
+                    output_path=os.path.join('media', 'reports',
+                        f'{name}-{datetime.now().day}-{datetime.now().month}-{datetime.now().year}-{datetime.now().hour}-{datetime.now().minute}.pdf')
+                )
 
     form = AddReportForm(user_id=request.user)
     paginator = Paginator(reports, 10)
@@ -236,3 +253,43 @@ def generate_frames(request, camera):
         frame = camera.get_frame(request)
         yield (b'--frame\r\n'
 				b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
+def create_pdf_report(title, date_time, violation_object, image_path, output_path):
+    c = canvas.Canvas(output_path, pagesize=letter)
+    width, height = letter
+    c.setFont("Helvetica-Bold", 24)
+    c.drawString(1 * inch, height - 1 * inch, title)
+    c.setFont("Helvetica", 12)
+    c.drawString(1 * inch, height - 1.5 * inch, f"Date & time: {date_time}")
+    c.drawString(1 * inch, height - 2 * inch, f"Object: {violation_object}")
+
+    try:
+        image = Image.open(image_path)
+        image_width, image_height = image.size
+        aspect = image_height / float(image_width)
+        display_width = 4 * inch
+        display_height = display_width * aspect
+        if display_height > (height - 3 * inch):
+            display_height = height - 3 * inch
+            display_width = display_height / aspect
+
+        c.drawImage(image, 1 * inch, height - 3 * inch - display_height, display_width, display_height)
+    except Exception as e:
+        c.setFont("Helvetica", 12)
+        c.drawString(1 * inch, height - 3 * inch, "Cannot load image.")
+
+    c.save()
+
+def create_word_report(title, date_time, violation_object, image_path, output_path):
+    doc = Document()
+    doc.add_heading(title, level=1)
+    doc.add_paragraph(f"Дата и время: {date_time}")
+    doc.add_paragraph(f"Объект нарушения: {violation_object}")
+
+    try:
+        doc.add_picture(image_path, width=Inches(4))
+    except Exception as e:
+        doc.add_paragraph("Изображение не может быть загружено.")
+        doc.add_paragraph(str(e))
+
+    doc.save(output_path)
