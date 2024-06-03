@@ -18,7 +18,7 @@ class Camera(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return f'Камера:{self.name}'
+        return f'Камера: {self.name}'
 
 
 class Place(models.Model):
@@ -39,7 +39,7 @@ class Violation(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return f'Нарушение: {self.violation_class} за {self.date_time.strftime("%d-%m-%Y %H:%M")}'
+        return f'{self.violation_class} [{self.date_time.strftime("%d-%m-%Y %H:%M")}]'
 
 class Report(models.Model):
     name = models.CharField(name="name", max_length=200, null=False, help_text="Введите название отчета", verbose_name="Название отчета")
@@ -49,4 +49,4 @@ class Report(models.Model):
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", default=1, verbose_name="Идентификатор пользователя")
 
     def __str__(self):
-        return f'Отчет за {self.date_time}'
+        return f"Отчет за {self.date_time.strftime('%d.%m.%y %H:%M')}"

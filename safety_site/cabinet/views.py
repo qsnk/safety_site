@@ -1,5 +1,5 @@
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.conf import settings
 from django.core.cache import cache
@@ -7,18 +7,20 @@ from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
-from django.http.response import StreamingHttpResponse, HttpResponse
+from django.http.response import StreamingHttpResponse, HttpResponse, FileResponse
 from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm
 from cabinet.models import Camera, Place, Violation, Report
 from cabinet.camera import IpCamera
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 from PIL import Image
 from docx import Document
 from docx.shared import Inches
 from datetime import datetime
-import cv2, os
+from urllib.parse import urljoin
+import cv2, os, io, requests
 
 # Create your views here.
 @login_required(login_url="/login/")
@@ -212,11 +214,12 @@ def reports(request):
                 report_filename = f'{name}-{date_time.day}-{date_time.month}-{date_time.year}-{date_time.hour}-{date_time.minute}.pdf'
                 report_file_path = os.path.join('reports', report_filename)
                 file = report_file_path
-                report = Report(name=name, date_time=date_time, violation_id=violation_id, file=file, user_id=user_id)
+                report = Report(name=name, date_time=date_time.strftime('%d.%m.%y %H:%M'), violation_id=violation_id, file=file, user_id=user_id)
                 report.save()
                 create_pdf_report(
+                    request=request,
                     title=name,
-                    date_time=date_time.strftime('%y-%m-%d-%H:%M:%S'),
+                    date_time=date_time.strftime('%d.%m.%y %H:%M'),
                     violation_object=violation_id,
                     image_path=violation_id.photo.url,
                     output_path=os.path.join('media', 'reports',
@@ -254,42 +257,73 @@ def generate_frames(request, camera):
         yield (b'--frame\r\n'
 				b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
-def create_pdf_report(title, date_time, violation_object, image_path, output_path):
+def create_pdf_report(request, title, date_time, violation_object, image_path, output_path):
     c = canvas.Canvas(output_path, pagesize=letter)
     width, height = letter
-    c.setFont("Helvetica-Bold", 24)
+
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.pdfbase import pdfmetrics
+    pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
+    c.setFont('DejaVuSans', 24)
     c.drawString(1 * inch, height - 1 * inch, title)
-    c.setFont("Helvetica", 12)
-    c.drawString(1 * inch, height - 1.5 * inch, f"Date & time: {date_time}")
-    c.drawString(1 * inch, height - 2 * inch, f"Object: {violation_object}")
+    c.setFont('DejaVuSans', 12)
+    c.drawString(1 * inch, height - 1.5 * inch, f"Дата и время: {date_time}")
+    c.drawString(1 * inch, height - 2 * inch, f"Объект нарушения: {violation_object}")
+    c.drawString(1 * inch, height - 2.5 * inch, "Изображение:")
+    full_image_url = urljoin(f'{request.scheme}://{request.get_host()}', image_path)
 
     try:
-        image = Image.open(image_path)
-        image_width, image_height = image.size
+        response = requests.get(full_image_url)
+        image = ImageReader(io.BytesIO(response.content))
+        image_width, image_height = image.getSize()
         aspect = image_height / float(image_width)
         display_width = 4 * inch
         display_height = display_width * aspect
         if display_height > (height - 3 * inch):
             display_height = height - 3 * inch
             display_width = display_height / aspect
-
         c.drawImage(image, 1 * inch, height - 3 * inch - display_height, display_width, display_height)
     except Exception as e:
-        c.setFont("Helvetica", 12)
-        c.drawString(1 * inch, height - 3 * inch, "Cannot load image.")
+        c.drawString(1 * inch, height - 3 * inch, "Изображение не может быть загружено.")
+        c.drawString(1 * inch, height - 3.5 * inch, str(e))
 
+    c.showPage()
     c.save()
 
-def create_word_report(title, date_time, violation_object, image_path, output_path):
+def create_word_report(request, title, date_time, violation_object, image_url):
     doc = Document()
     doc.add_heading(title, level=1)
     doc.add_paragraph(f"Дата и время: {date_time}")
     doc.add_paragraph(f"Объект нарушения: {violation_object}")
+    doc.add_paragraph("Изображение:")
+    full_image_url = urljoin(f'{request.scheme}://{request.get_host()}', image_url)
 
     try:
-        doc.add_picture(image_path, width=Inches(4))
+        response = requests.get(full_image_url)
+        image = Image.open(io.BytesIO(response.content))
+        image_stream = io.BytesIO()
+        image.save(image_stream, format='PNG')
+        image_stream.seek(0)
+        doc.add_picture(image_stream, width=Inches(4))
     except Exception as e:
         doc.add_paragraph("Изображение не может быть загружено.")
         doc.add_paragraph(str(e))
 
-    doc.save(output_path)
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+    return buffer
+
+@login_required(login_url="/login/")
+def download_word_report(request, report_id):
+    report = get_object_or_404(Report, pk=report_id)
+    buffer = create_word_report(
+        request=request,
+        title=report.name,
+        date_time=report.date_time.strftime('%d.%m.%y %H:%M'),
+        violation_object=report.violation_id,
+        image_url=report.violation_id.photo.url
+    )
+
+    response = FileResponse(buffer, as_attachment=True, filename=f'{report.name}.docx')
+    return response
