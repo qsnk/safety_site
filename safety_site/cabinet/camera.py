@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 class IpCamera(object):
     def __init__(self, url):
         self.url = url
-        self.capture = cv2.VideoCapture(self.url)   # "static/video/video.mp4"  self.url
+        self.capture = cv2.VideoCapture("static/video/video.mp4")   # "static/video/video.mp4"  self.url
         self.model = ultralytics.YOLO(NeuralNetwork.objects.get(pk=len(NeuralNetwork.objects.all())).file.url[1:])  # "yolov8n.pt"
         self.violations = ['no vest', 'no helmet', 'no boots', 'no glove']
         print(self.capture.isOpened())
@@ -38,14 +38,14 @@ class IpCamera(object):
                         description = "Отсутствует защитная обувь"
                     case _:
                         pass
-                saved_file = cv2.imwrite(os.path.join('media', 'violations', f'{"-".join(detection_class.split())}-{datetime.now().day}-{datetime.now().month}-{datetime.now().year}-{datetime.now().hour}-{datetime.now().minute}.jpg'), results[0].plot())
+                saved_file = cv2.imwrite(os.path.join('media', 'violations', f'{"-".join(detection_class.split())} {datetime.now().day}.{datetime.now().month}.{datetime.now().year} {datetime.now().hour}:{datetime.now().minute}.jpg'), results[0].plot())
 
                 if saved_file:
                     violation = Violation(
                         date_time=datetime.now().strftime('%y-%m-%d-%H:%M:%S'),
                         violation_class=detection_class,
                         description=description,
-                        photo=f'violations/{"-".join(detection_class.split())}-{datetime.now().day}-{datetime.now().month}-{datetime.now().year}-{datetime.now().hour}-{datetime.now().minute}.jpg',
+                        photo=f'violations/{"-".join(detection_class.split())} {datetime.now().day}.{datetime.now().month}.{datetime.now().year} {datetime.now().hour}:{datetime.now().minute}.jpg',
                         user_id=request.user
                     )
                     violation.save()
