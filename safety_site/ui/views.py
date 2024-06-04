@@ -19,7 +19,7 @@ def sign_in(request):
                 login(request, user)
                 return redirect('/cabinet/')
             else:
-                messages.error(request, "Wrong username or password")
+                messages.error(request, "Неверное имя пользователя или пароль!")
     else:
         form = LoginForm()
     context = {'form': form}

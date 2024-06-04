@@ -4,6 +4,7 @@ from cabinet.views import *
 
 urlpatterns = [
     path('', index, name='cabinet_index'),
+    path('logout/', log_out, name='cabinet_logout'),
     path('add-camera/', add_cameras, name='cabinet_cameras'),
     path('add-place/', add_places, name='cabinet_places'),
     path('watch/', watch_site, name='watch_site'),

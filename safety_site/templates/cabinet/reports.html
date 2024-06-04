@@ -6,6 +6,7 @@
     {% block head %}
         {{ block.super }}
         <title>{% block title %} Отчеты {% endblock title %}</title>
+        <script type="text/javascript" src="{% static 'scripts/clear_inputs.js' %}"></script>
         <style>
             button:hover{
                 svg{
@@ -38,7 +39,7 @@
                                     <div class="modal-body">
                                         <form method="post">
                                             {% csrf_token %}
-                                            {{ form.as_p }}
+                                            {{ report_form.as_p }}
                                             {% if messages %}
                                             <div class="messages">
                                             {% for message in messages %}
@@ -71,31 +72,46 @@
                             <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
                         <div class="offcanvas-body">
-                            ...
+                            <form method="post">
+                                {% csrf_token %}
+                                {{ filter_form.as_p }}
+                                {% if messages %}
+                                <div class="messages">
+                                {% for message in messages %}
+                                    <div class="error-message">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                                </div>
+                                {% endif %}
+                                <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
+                                <button type="submit" class="btn btn-outline-dark mt-4" name="show-filter-button">Показать</button>
+                            </form>
                         </div>
                     </div>
                     {% endblock sidebar %}
                 </div>
             </div>
-            <div class="row">
+            <div class="row mt-4">
                 <div class="col">
                     {% block table %}
-                    <table class="table">
-                        <thead>
+                    <h3>Сформированные отчеты</h3>
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-secondary">
                             <tr>
                                 <th scope="col">Название</th>
-                                <th scope="col">Дата и время формирования</th>
-                                <th scope="col">Нарушение</th>
-                                <th scope="col">Файл</th>
+                                <th class="text-center" scope="col">Сформирован</th>
+                                <th class="text-center" scope="col">Нарушение</th>
+                                <th class="text-center" scope="col">Файл</th>
                             </tr>
                         </thead>
                         <tbody class="table-group-divider">
                             {% for report in page %}
                             <tr>
                                 <td>{{ report.name }}</td>
-                                <td>{{ report.date_time }}</td>
-                                <td>{{ report.violation_id }}</td>
-                                <td>
+                                <td class="text-center">{{ report.date_time }}</td>
+                                <td class="text-center">{{ report.violation_id }}</td>
+                                <td class="text-center">
                                     <a href="{{ report.file.url }}" style="color: white;" target="_blank" rel="noopener noreferrer">
                                         <button class="btn btn-outline-dark" name="see-pdf-button">
                                             <svg width="16" height="16" viewBox="0 0 16 16" fill="black" xmlns="http://www.w3.org/2000/svg">

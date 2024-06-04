@@ -13,22 +13,26 @@
     {% block navbar %}
         {{ block.super }}
     {% endblock navbar %}
-    <div class="container mt-4" style="width: max-content;position: relative; left: 50%;float: left;">
-        <div class="wrapper form-floating" style="position: relative; left: -50%; float: left;">
-            <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            {% if messages %}
-			<div class="messages">
-			{% for message in messages %}
-				<div class="error-message">
-					{{ message }}
-				</div>
-			{% endfor %}
-			</div>
-		    {% endif %}
-            <button type="submit" class="btn btn-primary">Войти</button>
-        </form>
+    <div class="container mt-4">
+        <div class="wrapper form-floating">
+            <div class="row d-flex align-items-center justify-content-center" style="height: 50vh;">
+                <div class="col col-sm-6 col-md-4 col-lg-3">
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        {% if messages %}
+                        <div class="messages">
+                        {% for message in messages %}
+                            <div class="error-message">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-outline-dark">Войти</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     {% endblock body %}

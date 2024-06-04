@@ -1,14 +1,14 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.conf import settings
+from django.contrib.auth import logout
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
 from django.db.models.functions import TruncMonth
 from django.utils.dateformat import DateFormat
 from django.http.response import StreamingHttpResponse, HttpResponse, FileResponse
-from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm
+from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm, FilterReportForm
 from cabinet.models import Camera, Place, Violation, Report
 from cabinet.camera import IpCamera
 from reportlab.lib.pagesizes import letter
@@ -45,6 +45,11 @@ def index(request):
     return render(request, 'cabinet/index.html', context)
 
 @login_required(login_url="/login/")
+def log_out(request):
+    logout(request)
+    return redirect('/login/')
+
+@login_required(login_url="/login/")
 def add_cameras(request):
     if request.method == "POST":
         form = AddCameraForm(request.POST)
@@ -58,7 +63,7 @@ def add_cameras(request):
             messages.error(request, "Invalid data!")
     else:
         form = AddCameraForm
-    cameras = Camera.objects.all()
+    cameras = Camera.objects.all().order_by('-pk')
     paginator = Paginator(cameras, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -80,7 +85,7 @@ def add_places(request):
             messages.error(request, "Invalid data!")
     else:
         form = AddPlaceForm(user_id=request.user)
-    places = Place.objects.all()
+    places = Place.objects.all().order_by('-pk')
     paginator = Paginator(places, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -145,47 +150,51 @@ def stream_video(request):
 
 @login_required(login_url="/login/")
 def journal(request):
-    violations = Violation.objects.all()
-    date = None
-    time = None
-    violation_classes = None
+    violations = Violation.objects.all().order_by('-pk')
+
     if request.method == "POST":
-        form = FilterJournalForm(request.POST)
+        form = FilterJournalForm(request.POST, user_id=request.user)
         if form.is_valid():
             date_start = form.cleaned_data["date_start"]
             date_end = form.cleaned_data["date_end"]
-            time_start = form.cleaned_data["time_start"]
-            time_end = form.cleaned_data["time_end"]
+            time = form.cleaned_data["time"]
             violation_classes = form.cleaned_data["violations"]
-            print(date_start, date_end, time_start, time_end, violation_classes)
 
             if date_start:
-                violations = Violation.objects.filter(date_time__date=date_start)
-                print(violations)
+                violations = Violation.objects.filter(date_time__date=date_start).order_by('-pk')
             if date_end:
-                violations = Violation.objects.filter(date_time__date=date_end)
-                print(violations)
+                violations = Violation.objects.filter(date_time__date=date_end).order_by('-pk')
             if date_start and date_end:
-                violations = Violation.objects.filter(date_time__range=[date_start, date_end])
+                violations = Violation.objects.filter(date_time__range=[date_start, date_end]).order_by('-pk')
 
-            if time_start:
-                violations = Violation.objects.filter(date_time__time=time_start)
-                print(violations)
-            if time_end:
-                violations = Violation.objects.filter(date_time__time=time_end)
-                print(violations)
-            if time_start and time_end:
-                violations = Violation.objects.filter(date_time__range=[time_start, time_end])
+            if time:
+                violations = Violation.objects.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
 
             if violation_classes:
-                violations = Violation.objects.filter(violation_class__in=list(violation_classes))
-                print(violations)
+                violations = Violation.objects.filter(violation_class__in=violation_classes).order_by('-pk')
+
+            paginator = Paginator(violations, 20)
+            page_number = request.GET.get('page')
+            page = paginator.get_page(page_number)
+            context = {
+                'form': form,
+                'date_start': date_start,
+                'date_end': date_end,
+                'time': time,
+                'violation_classes': violation_classes,
+                'page': page
+            }
+            return render(request, 'cabinet/journal.html', context)
 
         else:
             print("Invalid data!")
             messages.error(request, "Invalid data!")
 
-    form = FilterJournalForm()
+    date_start = request.GET.get('date_start')
+    date_end = request.GET.get('date_end')
+    time = request.GET.get('time')
+    violation_classes = request.GET.get('violation_classes')
+    form = FilterJournalForm(user_id=request.user)
     paginator = Paginator(violations, 20)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -193,15 +202,16 @@ def journal(request):
         'violations': violations,
         'form': form,
         'page': page,
-        'date': date,
+        'date_start': date_start,
+        'date_end': date_end,
         'time': time,
-        'violation_classes': violation_classes
+        'violation_classes': violation_classes,
     }
     return render(request, 'cabinet/journal.html', context)
 
 @login_required(login_url="/login/")
 def reports(request):
-    reports = Report.objects.all()
+    reports = Report.objects.all().order_by('-pk')
 
     if request.method == "POST":
         if 'add-report-button' in request.POST:
@@ -226,14 +236,57 @@ def reports(request):
                         f'{name}-{datetime.now().day}-{datetime.now().month}-{datetime.now().year}-{datetime.now().hour}-{datetime.now().minute}.pdf')
                 )
 
-    form = AddReportForm(user_id=request.user)
+        if 'show-filter-button' in request.POST:
+            filter_form = FilterReportForm(request.POST, user_id=request.user)
+            if filter_form.is_valid():
+                date_start = filter_form.cleaned_data["date_start"]
+                date_end = filter_form.cleaned_data["date_end"]
+                time = filter_form.cleaned_data["time"]
+                violation_classes = filter_form.cleaned_data["violations"]
+
+                if date_start:
+                    reports = Report.objects.filter(date_time__date=date_start).order_by('-pk')
+                if date_end:
+                    reports = Report.objects.filter(date_time__date=date_end).order_by('-pk')
+                if date_start and date_end:
+                    reports = Report.objects.filter(date_time__range=[date_start, date_end]).order_by('-pk')
+
+                if time:
+                    reports = Report.objects.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
+
+                if violation_classes:
+                    violations = Violation.objects.filter(violation_class__in=violation_classes)
+                    reports = Report.objects.filter(violation_id__in=violations).order_by('-pk')
+
+                report_form = AddReportForm(user_id=request.user)
+                paginator = Paginator(reports, 20)
+                page_number = request.GET.get('page')
+                page = paginator.get_page(page_number)
+                context = {
+                    'report_form': report_form,
+                    'filter_form': filter_form,
+                    'date_start': date_start,
+                    'date_end': date_end,
+                    'time': time,
+                    'violation_classes': violation_classes,
+                    'page': page
+                }
+                return render(request, 'cabinet/reports.html', context)
+
+            else:
+                print("Invalid data!")
+                messages.error(request, "Invalid data!")
+
+    report_form = AddReportForm(user_id=request.user)
+    filter_form = FilterReportForm(user_id=request.user)
     paginator = Paginator(reports, 10)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {
         'reports': reports,
         'page': page,
-        'form': form,
+        'report_form': report_form,
+        'filter_form': filter_form
     }
     return render(request, 'cabinet/reports.html', context)
 
@@ -243,11 +296,11 @@ def statistics(request):
     violations_count = len(violations)
     months = Violation.objects.annotate(month=TruncMonth('date_time')).values('month').annotate(count=Count('id')).order_by('month')
     data = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
-    print(data)
     context = {
         'violations': violations,
         'violations_count': violations_count,
-        'data': data
+        'data': data,
+        'months': [item["month"] for item in data]
     }
     return render(request, 'cabinet/statistics.html', context)
 
@@ -266,6 +319,7 @@ def create_pdf_report(request, title, date_time, violation_object, image_path, o
     pdfmetrics.registerFont(TTFont('DejaVuSans', 'DejaVuSans.ttf'))
     c.setFont('DejaVuSans', 24)
     c.drawString(1 * inch, height - 1 * inch, title)
+    c.setTitle(title)
     c.setFont('DejaVuSans', 12)
     c.drawString(1 * inch, height - 1.5 * inch, f"Дата и время: {date_time}")
     c.drawString(1 * inch, height - 2 * inch, f"Объект нарушения: {violation_object}")

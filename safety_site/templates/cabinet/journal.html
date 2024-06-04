@@ -6,6 +6,7 @@
     {% block head %}
         {{ block.super }}
         <title>{% block title %} Журнал {% endblock title %}</title>
+        <script type="text/javascript" src="{% static 'scripts/clear_inputs.js' %}"></script>
     {% endblock head %}
 </head>
 <body>
@@ -51,24 +52,24 @@
             <div class="row">
                 <div class="col">
                     {% block table %}
-                    <table class="table">
-                        <thead>
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-secondary">
                             <tr>
-                                <th scope="col">Дата</th>
-                                <th scope="col">Время</th>
-                                <th scope="col">Нарушение</th>
+                                <th class="text-center" scope="col">Дата</th>
+                                <th class="text-center" scope="col">Время</th>
+                                <th class="text-center" scope="col">Нарушение</th>
                                 <th scope="col">Описание</th>
-                                <th scope="col">Фото</th>
+                                <th class="text-center" scope="col">Фото</th>
                             </tr>
                         </thead>
                         <tbody class="table-group-divider">
                             {% for violation in page %}
                             <tr>
-                                <td>{{ violation.date_time.date }}</td>
-                                <td>{{ violation.date_time.time }}</td>
-                                <td>{{ violation.violation_class }}</td>
+                                <td class="text-center">{{ violation.date_time.date }}</td>
+                                <td class="text-center">{{ violation.date_time.time }}</td>
+                                <td class="text-center">{{ violation.violation_class }}</td>
                                 <td>{{ violation.description }}</td>
-                                <td><a href="{{ violation.photo.url }}"><img class="img-fluid rounded" width="100" height="100" src="{{ violation.photo.url }}" alt="{{ violation.photo.url }}"></a></td>
+                                <td class="text-center"><a href="{{ violation.photo.url }}" target="_blank" rel="noopener noreferrer"><img class="img-fluid rounded" width="100" height="100" src="{{ violation.photo.url }}" alt="{{ violation.photo.url }}"></a></td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -95,7 +96,7 @@
                         {% endfor %}
                     {% endif %}
                     {% if page.has_next %}
-                        {% if violation_classes != None %}
+                        {% if violation_classes %}
                             <li class="page-item"><a class="page-link" href="?violations={{ violation_classes }}&page={{ page.next_page_number }}">&raquo</a></li>
                         {% else %}
                             <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">&raquo</a></li>
@@ -106,19 +107,6 @@
                 </ul>
             </nav>
         </div>
-    <script>
-        $('#clean_inputs').click(function() {
-            $('input[type="date"]').each(function() {
-               $(this).val('');
-            });
-            $('input[type="time"]').each(function() {
-               $(this).val('');
-            });
-            $(':checkbox').each(function() {
-                this.checked = false;
-            });
-        });
-    </script>
     {% endblock content %}
     {% endblock body %}
 </body>

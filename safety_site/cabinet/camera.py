@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 class IpCamera(object):
     def __init__(self, url):
         self.url = url
-        self.capture = cv2.VideoCapture("static/video/video.mp4")   # "static/video/video.mp4"  self.url
+        self.capture = cv2.VideoCapture(self.url)   # "static/video/video.mp4"  self.url
         self.model = ultralytics.YOLO(NeuralNetwork.objects.get(pk=len(NeuralNetwork.objects.all())).file.url[1:])  # "yolov8n.pt"
         self.violations = ['no vest', 'no helmet', 'no boots', 'no glove']
         print(self.capture.isOpened())
