@@ -39,12 +39,20 @@
                             <a class="nav-link" href="{% url 'cabinet_statistics'%}">Статистика</a>
                         </li>
                     </ul>
-                    <a href="{% url 'cabinet_index' %}">
-                        <button class="profile rounded-circle" style="background: transparent; width: 40px; height: 40px; border: 2px solid;">
-                            <!--<img width="40px" height="40px" class="rounded-circle" src="{% static 'images/test/image.jpeg' %}" alt=""> -->
-                            <span>{{ request.user.email.0|upper }}</span>
+                    <div class="dropdown me-3">
+                        <button class="dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" style="background: transparent; border: none">
                         </button>
-                    </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'cabinet_index' %}">Профиль</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="#">Вопросы</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'cabinet_logout' %}">Выйти</a></li>
+                        </ul>
+                    </div>
+                    <button class="profile rounded-circle" style="background: transparent; width: 40px; height: 40px; border: 2px solid;">
+                        <span>{{ request.user.email.0|upper }}</span>
+                    </button>
                 </div>
             </div>
         </nav>

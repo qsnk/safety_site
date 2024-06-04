@@ -39,6 +39,10 @@ class ShowPlaceForm(forms.Form):
 
 
 class FilterJournalForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(FilterJournalForm, self).__init__(*args, **kwargs)
+        self.fields['violations'].choices = [(violation.violation_class, violation.violation_class) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class').distinct('violation_class')]
     date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
         'class': 'form-control',
         'type': 'date'
@@ -47,16 +51,13 @@ class FilterJournalForm(forms.Form):
         'class': 'form-control',
         'type': 'date'
     }))
-    time_start = forms.TimeField(label='[время] от', required=False, widget=forms.TimeInput(attrs={
+    time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
         'class': 'form-control',
         'type': 'time'
     }))
-    time_end = forms.TimeField(label='[время] до', required=False, widget=forms.TimeInput(attrs={
-        'class': 'form-control',
-        'type': 'time'
-    }))
-    violations = forms.ModelMultipleChoiceField(label='Класс нарушения', required=False, queryset=Violation.objects.order_by('violation_class').distinct('violation_class'), widget=forms.CheckboxSelectMultiple(attrs={
-        'type': 'checkbox'
+    violations = forms.MultipleChoiceField(label='Класс нарушения', required=False,
+                                           choices=[],
+                                           widget=forms.CheckboxSelectMultiple(attrs={'type': 'checkbox'
     }))
 
 
@@ -76,4 +77,23 @@ class AddReportForm(forms.Form):
 
 
 class FilterReportForm(forms.Form):
-    pass
+    def __init__(self, *args, **kwargs):
+        user_id = kwargs.pop('user_id', None)
+        super(FilterReportForm, self).__init__(*args, **kwargs)
+        self.fields['violations'].choices = [(violation.violation_class, violation.violation_class) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class').distinct('violation_class')]
+    date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    date_end = forms.DateField(label='[дата] до', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
+        'class': 'form-control',
+        'type': 'time'
+    }))
+    violations = forms.MultipleChoiceField(label='Класс нарушения', required=False,
+                                               choices=[],
+                                                widget=forms.CheckboxSelectMultiple(attrs={'type': 'checkbox'
+    }))
