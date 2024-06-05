@@ -3,11 +3,11 @@ from cabinet.models import Place, Camera, Violation, Report
 
 
 class AddCameraForm(forms.Form):
-    name = forms.CharField(label="Подпись камеры", widget=forms.TextInput(attrs={
+    name = forms.CharField(label="Подпись камеры", required=True, widget=forms.TextInput(attrs={
         'placeholder': 'Введите подпись для камеры',
         'class': 'form-control'
     }))
-    url = forms.CharField(label="Ссылка для подключения", widget=forms.TextInput(attrs={
+    url = forms.CharField(label="Ссылка для подключения", required=True, widget=forms.TextInput(attrs={
         'placeholder': 'Введите ссылку для подключения к камере',
         'class': 'form-control'
     }))
@@ -19,7 +19,7 @@ class AddPlaceForm(forms.Form):
         super(AddPlaceForm, self).__init__(*args, **kwargs)
         self.fields['camera_id'].queryset = Camera.objects.filter(user_id=user_id)
 
-    name = forms.CharField(label="Подпись участка", widget=forms.TextInput(attrs={
+    name = forms.CharField(label="Подпись участка", required=True, widget=forms.TextInput(attrs={
         'placeholder': 'Введите подпись для участка',
         'class': 'form-control'
     }))
@@ -27,7 +27,7 @@ class AddPlaceForm(forms.Form):
         'placeholder': 'Введите описание для участка',
         'class': 'form-control'
     }))
-    camera_id = forms.ModelChoiceField(label="Камера участка", queryset=Camera.objects.none())
+    camera_id = forms.ModelChoiceField(label="Камера участка", required=True, queryset=Camera.objects.none())
 
 
 class ShowPlaceForm(forms.Form):
@@ -35,7 +35,7 @@ class ShowPlaceForm(forms.Form):
         user_id = kwargs.pop('user_id', None)
         super(ShowPlaceForm, self).__init__(*args, **kwargs)
         self.fields['places'].queryset = Place.objects.filter(user_id=user_id)
-    places = forms.ModelMultipleChoiceField(label='Площадки', queryset=Place.objects.none(), widget=forms.CheckboxSelectMultiple(attrs={}))
+    places = forms.ModelMultipleChoiceField(label='Площадки', required=False, queryset=Place.objects.none(), widget=forms.CheckboxSelectMultiple(attrs={}))
 
 
 class FilterJournalForm(forms.Form):

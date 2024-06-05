@@ -18,6 +18,11 @@ COPY Lap/lap /usr/local/lib/python3.10/site-packages/lap
 COPY Lap/lap-0.4.0.dist-info /usr/local/lib/python3.10/site-packages/lap-0.4.0.dist-info
 
 WORKDIR /app
+
+RUN mkdir /media/violations
+RUN mkdir /media/neural_networks
+RUN mkdir /media/reports
+
 EXPOSE 8000
 
 RUN adduser --disabled-password app-user
