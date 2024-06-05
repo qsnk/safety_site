@@ -5,7 +5,7 @@
 <head>
     {% block head %}
         {{ block.super }}
-        <title>{% block title %} Вход в личный кабинет {% endblock title %}</title>
+        <title>{% block title %} Регистрация {% endblock title %}</title>
     {% endblock head %}
 </head>
 <body>
@@ -29,9 +29,9 @@
                         {% endfor %}
                         </div>
                         {% endif %}
-                        <button type="submit" class="btn btn-outline-dark">Войти</button>
-                        <a href="{% url 'signup' %}">
-                            <button type="button" class="btn btn-outline-dark">Зарегистрироваться</button>
+                        <button type="submit" class="btn btn-outline-dark">Зарегистрироваться</button>
+                        <a href="{% url 'login' %}">
+                            <button type="button" class="btn btn-outline-dark">Войти</button>
                         </a>
                     </form>
                 </div>
