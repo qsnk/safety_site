@@ -1,12 +1,28 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from ui.forms import LoginForm
+from django.contrib.auth.models import User
+from ui.forms import LoginForm, SignupForm
 
-# Create your views here.
 
 def index(request):
     return render(request, 'ui/index.html')
+
+def signup(request):
+    if not request.user.is_authenticated:
+        if request.method == 'POST':
+            form = SignupForm(request.POST)
+            if form.is_valid():
+                password1 = form.cleaned_data['password1']
+                password2 = form.cleaned_data['password2']
+                if password1 == password2:
+                    form.save()
+                return redirect('/login/')
+
+    form = SignupForm()
+    context = {'form': form}
+    return render(request, 'ui/signup.html', context)
+
 
 def sign_in(request):
     if request.user.is_authenticated:

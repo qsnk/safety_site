@@ -62,12 +62,16 @@ def add_cameras(request):
         else:
             messages.error(request, "Invalid data!")
     else:
-        form = AddCameraForm
-    cameras = Camera.objects.all().order_by('-pk')
+        form = AddCameraForm()
+    cameras = Camera.objects.filter(user_id=request.user).order_by('-pk')
     paginator = Paginator(cameras, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    context = {'form': form, "cameras": cameras, "page": page}
+    context = {
+        'form': form,
+        "cameras": cameras,
+        "page": page
+    }
     return render(request, 'cabinet/add_cameras.html', context)
 
 @login_required(login_url="/login/")
@@ -85,7 +89,7 @@ def add_places(request):
             messages.error(request, "Invalid data!")
     else:
         form = AddPlaceForm(user_id=request.user)
-    places = Place.objects.all().order_by('-pk')
+    places = Place.objects.filter(user_id=request.user).order_by('-pk')
     paginator = Paginator(places, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
@@ -150,7 +154,7 @@ def stream_video(request):
 
 @login_required(login_url="/login/")
 def journal(request):
-    violations = Violation.objects.all().order_by('-pk')
+    violations = Violation.objects.filter(user_id=request.user).order_by('-pk')
 
     if request.method == "POST":
         form = FilterJournalForm(request.POST, user_id=request.user)
@@ -211,7 +215,7 @@ def journal(request):
 
 @login_required(login_url="/login/")
 def reports(request):
-    reports = Report.objects.all().order_by('-pk')
+    reports = Report.objects.filter(user_id=request.user).order_by('-pk')
 
     if request.method == "POST":
         if 'add-report-button' in request.POST:
@@ -292,9 +296,9 @@ def reports(request):
 
 @login_required(login_url="/login/")
 def statistics(request):
-    violations = Violation.objects.all()
+    violations = Violation.objects.filter(user_id=request.user).order_by('-pk')
     violations_count = len(violations)
-    months = Violation.objects.annotate(month=TruncMonth('date_time')).values('month').annotate(count=Count('id')).order_by('month')
+    months = violations.annotate(month=TruncMonth('date_time')).values('month').annotate(count=Count('id')).order_by('month')
     data = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
     context = {
         'violations': violations,
