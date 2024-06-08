@@ -1,21 +1,33 @@
-<!DOCTYPE html>
 {% extends 'ui/base.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    {% block head %}
-        {{ block.super }}
-        <title>{% block title %} Главная страница {% endblock title %}</title>
-    {% endblock head %}
-</head>
-<body>
-    {% block body %}
-    {{ block.super }}
-    {% block content %}
-    <div class="container">
-        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A accusamus alias aspernatur cum deserunt dicta dolor eius iste maxime molestias necessitatibus nesciunt odio odit officia placeat qui, repellat sint sunt.</p>
+{% block title %} Главная страница {% endblock title %}
+
+{% block content %}
+<div class="row d-flex align-items-center">
+    <div class="col d-inline justify-content-center">
+        <h3>Безопасность на строительной площадке — наш главный приоритет</h3>
+        <p>Мы рады представить вам инновационное решение, которое помогает обеспечить безопасность и защиту всех работников на строительных объектах.</p>
+        <h3>Почему это важно?</h3>
+        <p>
+            Строительные площадки — это зоны повышенного риска, и нарушения техники безопасности могут привести к серьезным инцидентам, травмам и даже смертям. Использование нашего приложения помогает минимизировать эти риски, обеспечивая безопасность рабочих и соответствие нормативным требованиям.
+        </p>
     </div>
-    {% endblock content %}
-    {% endblock body %}
-</body>
-</html>
+    <div class="col">
+        <img src="{% static 'images/construction-site.avif' %}" alt="Construction site">
+    </div>
+</div>
+<div class="row mt-4 d-flex align-items-center">
+    <div class="col">
+        <img src="{% static 'images/construction-site2.avif' %}" alt="Construction site">
+    </div>
+    <div class="col">
+        <h3>Как это работает?</h3>
+        <ol>
+            <li><b>Установка камер:</b> Размещение камер на ключевых точках строительной площадки для мониторинга.</li>
+            <li><b>Анализ данных:</b> Система анализирует видео в режиме реального времени, выявляя потенциальные угрозы.</li>
+            <li><b>Уведомления и действия:</b> При обнаружении нарушений система отправляет уведомления ответственным лицам для немедленного реагирования.</li>
+            <li><b>Отчеты и улучшения:</b> Составление отчетов и рекомендаций по улучшению безопасности на основе полученных данных.</li>
+        </ol>
+    </div>
+</div>
+{% endblock content %}

@@ -1,69 +1,60 @@
-<!DOCTYPE html>
 {% extends 'cabinet/base_cabinet.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    {% block head %}
-        {{ block.super }}
-        <title>{% block title %} Личный кабинет {% endblock title %}</title>
-    {% endblock head %}
-</head>
-<body>
-    {% block body %}
-    {{ block.super }}
-    {% block content %}
-    <div class="container">
-        <h2 class="mt-4">Личный кабинет</h2>
+{% block title %} Личный кабинет {% endblock title %}
+
+{% block content %}
+<h2 class="mt-4">Личный кабинет</h2>
+<div class="row">
+    <div class="col col-3 d-flex align-items-center justify-content-center">
+        <img class="img-fluid" src="{% static 'images/worker.jpeg' %}" alt="User photo">
+    </div>
+    <div class="col col-5">
+        <h3>Данные</h3>
         <div class="row">
-            <div class="col col-3">
-                <img class="img-fluid" width="300" height="300" src="{% static 'images/test/image.jpeg' %}" alt="User photo">
+            <div class="col">
+                Имя пользователя:
             </div>
-            <div class="col col-5">
-                <h3>Данные</h3>
-                <div class="row">
-                    <div class="col">
-                        Имя пользователя:
-                    </div>
-                    <div class="col">
-                        {{ username }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        Имя:
-                    </div>
-                    <div class="col">
-                        {{ first_name }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        Фамилия:
-                    </div>
-                    <div class="col">
-                        {{ last_name }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        Электронная почта:
-                    </div>
-                    <div class="col">
-                        {{ email }}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        Зарегистрирован:
-                    </div>
-                    <div class="col">
-                        {{ date_joined }}
-                    </div>
-                </div>
+            <div class="col">
+                {{ username }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Имя:
+            </div>
+            <div class="col">
+                {{ first_name }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Фамилия:
+            </div>
+            <div class="col">
+                {{ last_name }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Электронная почта:
+            </div>
+            <div class="col">
+                {{ email }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                Зарегистрирован:
+            </div>
+            <div class="col">
+                {{ date_joined }}
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col">
+                <button class="btn btn-outline-dark">Редактировать</button>
             </div>
         </div>
     </div>
-    {% endblock content %}
-    {% endblock body %}
-</body>
-</html>
+</div>
+{% endblock content %}

@@ -1,14 +1,16 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count, Q
-from django.db.models.functions import TruncMonth
+from django.db.models.functions import TruncMonth, TruncDay
 from django.utils.dateformat import DateFormat
 from django.http.response import StreamingHttpResponse, HttpResponse, FileResponse
-from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm, FilterReportForm
+from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm, \
+    FilterReportForm, FilterStatisticsForm, FilterCameraForm, FilterPlaceForm
 from cabinet.models import Camera, Place, Violation, Report
 from cabinet.camera import IpCamera
 from reportlab.lib.pagesizes import letter
@@ -51,49 +53,124 @@ def log_out(request):
 
 @login_required(login_url="/login/")
 def add_cameras(request):
-    if request.method == "POST":
-        form = AddCameraForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data["name"]
-            url = form.cleaned_data["url"]
-            user_id = request.user
-            camera = Camera(name=name, url=url, user_id=user_id)
-            camera.save()
-        else:
-            messages.error(request, "Invalid data!")
-    else:
-        form = AddCameraForm()
     cameras = Camera.objects.filter(user_id=request.user).order_by('-pk')
+
+    if request.method == "POST":
+        if 'add-camera-button' in request.POST:
+            form = AddCameraForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data["name"]
+                url = form.cleaned_data["url"]
+                user_id = request.user
+                camera = Camera(name=name, url=url, user_id=user_id)
+                camera.save()
+            else:
+                messages.error(request, "Invalid data!")
+
+        if 'show-filter-button' in request.POST:
+            form = FilterCameraForm(request.POST)
+            if form.is_valid():
+                date_start = form.cleaned_data["date_start"]
+                date_end = form.cleaned_data["date_end"]
+                month = form.cleaned_data["month"]
+                time = form.cleaned_data["time"]
+
+                if date_start:
+                    cameras = cameras.filter(date_time__date=date_start).order_by('-pk')
+                if date_end:
+                    cameras = cameras.filter(date_time__date=date_end).order_by('-pk')
+                if date_start and date_end:
+                    cameras = cameras.filter(date_time__range=[date_start, date_end]).order_by('-pk')
+
+                if month:
+                    cameras = cameras.filter(date_time__year=month.split("-")[0],
+                                                   date_time__month=month.split("-")[1]).order_by('-pk')
+                if time:
+                    cameras = cameras.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by(
+                        '-pk')
+
+                paginator = Paginator(cameras, 5)
+                page_number = request.GET.get('page')
+                page = paginator.get_page(page_number)
+                context = {
+                    'filter_form': form,
+                    'cameras': cameras,
+                    'page': page
+                }
+                return render(request, 'cabinet/add_cameras.html', context)
+
+    add_form = AddCameraForm()
+    filter_form = FilterCameraForm()
     paginator = Paginator(cameras, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     context = {
-        'form': form,
-        "cameras": cameras,
-        "page": page
+        'form': add_form,
+        'filter_form': filter_form,
+        'cameras': cameras,
+        'page': page
     }
     return render(request, 'cabinet/add_cameras.html', context)
 
 @login_required(login_url="/login/")
 def add_places(request):
-    if request.method == "POST":
-        form = AddPlaceForm(request.POST, user_id=request.user)
-        if form.is_valid():
-            name = form.cleaned_data["name"]
-            description = form.cleaned_data["description"]
-            camera_id = form.cleaned_data["camera_id"]
-            user_id = request.user
-            place = Place(name=name, description=description, camera_id=camera_id, user_id=user_id)
-            place.save()
-        else:
-            messages.error(request, "Invalid data!")
-    else:
-        form = AddPlaceForm(user_id=request.user)
     places = Place.objects.filter(user_id=request.user).order_by('-pk')
+
+    if request.method == "POST":
+        if 'add-place-button' in request.POST:
+            form = AddPlaceForm(request.POST, user_id=request.user)
+            if form.is_valid():
+                name = form.cleaned_data["name"]
+                description = form.cleaned_data["description"]
+                camera_id = form.cleaned_data["camera_id"]
+                user_id = request.user
+                place = Place(name=name, description=description, camera_id=camera_id, user_id=user_id)
+                place.save()
+            else:
+                messages.error(request, "Invalid data!")
+
+        if 'show-filter-button' in request.POST:
+            form = FilterPlaceForm(request.POST)
+            if form.is_valid():
+                date_start = form.cleaned_data["date_start"]
+                date_end = form.cleaned_data["date_end"]
+                month = form.cleaned_data["month"]
+                time = form.cleaned_data["time"]
+                if date_start:
+                    places = places.filter(date_time__date=date_start).order_by('-pk')
+                if date_end:
+                    places = places.filter(date_time__date=date_end).order_by('-pk')
+                if date_start and date_end:
+                    places = places.filter(date_time__range=[date_start, date_end]).order_by('-pk')
+
+                if month:
+                    places = places.filter(date_time__year=month.split("-")[0],
+                                             date_time__month=month.split("-")[1]).order_by('-pk')
+                if time:
+                    places = places.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by(
+                        '-pk')
+
+                paginator = Paginator(places, 5)
+                page_number = request.GET.get('page')
+                page = paginator.get_page(page_number)
+                context = {
+                    'filter_form': form,
+                    'places': places,
+                    'page': page
+                }
+                return render(request, 'cabinet/add_place.html', context)
+
+    add_form = AddPlaceForm(user_id=request.user)
+    filter_form = FilterPlaceForm()
     paginator = Paginator(places, 5)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    context = {'form': form, 'places': places, 'page': page}
+    context = {
+        'form': add_form,
+        'filter_form': filter_form,
+        'places': places,
+        'page': page
+    }
     return render(request, 'cabinet/add_place.html', context)
 
 @login_required(login_url="/login/")
@@ -161,21 +238,24 @@ def journal(request):
         if form.is_valid():
             date_start = form.cleaned_data["date_start"]
             date_end = form.cleaned_data["date_end"]
+            month = form.cleaned_data["month"]
             time = form.cleaned_data["time"]
             violation_classes = form.cleaned_data["violations"]
 
             if date_start:
-                violations = Violation.objects.filter(date_time__date=date_start).order_by('-pk')
+                violations = violations.filter(date_time__date=date_start).order_by('-pk')
             if date_end:
-                violations = Violation.objects.filter(date_time__date=date_end).order_by('-pk')
+                violations = violations.filter(date_time__date=date_end).order_by('-pk')
             if date_start and date_end:
-                violations = Violation.objects.filter(date_time__range=[date_start, date_end]).order_by('-pk')
+                violations = violations.filter(date_time__range=[date_start, date_end]).order_by('-pk')
 
+            if month:
+                violations = violations.filter(date_time__year=month.split("-")[0], date_time__month=month.split("-")[1]).order_by('-pk')
             if time:
-                violations = Violation.objects.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
+                violations = violations.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
 
             if violation_classes:
-                violations = Violation.objects.filter(violation_class__in=violation_classes).order_by('-pk')
+                violations = violations.filter(violation_class__in=violation_classes).order_by('-pk')
 
             paginator = Paginator(violations, 20)
             page_number = request.GET.get('page')
@@ -296,11 +376,47 @@ def reports(request):
 
 @login_required(login_url="/login/")
 def statistics(request):
+    if request.method == "POST":
+        form = FilterStatisticsForm(request.POST)
+        if form.is_valid():
+            month_year = form.cleaned_data["month_year"]
+            year = month_year.split("-")[0]
+            month = month_year.split("-")[1]
+            violations = Violation.objects.filter(user_id=request.user).filter(date_time__year=year, date_time__month=month).order_by('-pk')
+            violations_count = len(violations)
+            daily_violations = Violation.objects.filter(date_time__year=year, date_time__month=month) \
+                .annotate(day=TruncDay('date_time')) \
+                .values('day') \
+                .annotate(count=Count('id')) \
+                .order_by('day')
+
+            data = {
+                'labels': [entry['day'].strftime('%d %B %Y') for entry in daily_violations],
+                'counts': [entry['count'] for entry in daily_violations]
+            }
+            all_violations = Violation.objects.filter(user_id=request.user).order_by('-pk')
+            months = all_violations.annotate(month=TruncMonth('date_time')).values('month').annotate(
+                count=Count('id')).order_by('month')
+            violations_months = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
+
+            context = {
+                'form': form,
+                'month': month,
+                'year': year,
+                'violations_count': violations_count,
+                'daily_violations': data,
+                'data': violations_months
+
+            }
+            return render(request, 'cabinet/statistics.html', context)
+
+    form = FilterStatisticsForm()
     violations = Violation.objects.filter(user_id=request.user).order_by('-pk')
     violations_count = len(violations)
     months = violations.annotate(month=TruncMonth('date_time')).values('month').annotate(count=Count('id')).order_by('month')
     data = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
     context = {
+        'form': form,
         'violations': violations,
         'violations_count': violations_count,
         'data': data,

@@ -1,106 +1,135 @@
-<!DOCTYPE html>
 {% extends 'cabinet/base_cabinet.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    {% block head %}
-        {{ block.super }}
-        <title>{% block title %} Статистика {% endblock title %}</title>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {% endblock head %}
-</head>
-<body>
-    {% block body %}
-    {{ block.super }}
-    {% block content %}
-    <div class="container">
-        <h2 class="mt-4">Статистика нарушений</h2>
-        <div class="row">
-            <div class="col">
-                {% block table %}
-                <table class="table table-hover table-bordered">
-                    <thead class="table-secondary">
-                        <tr>
-                            <th scope="col">Месяц</th>
-                            <th scope="col">Количество нарушений</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                        {% for item in data %}
-                        <tr>
-                            <td>{{ item.month }}</td>
-                            <td>{{ item.count }}</td>
-                        </tr>
-                        {% endfor %}
-                        <tr>
-                            <td class="text-end fw-bold" colspan="1">Итого</td>
-                            <td>{{ violations_count }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                {% endblock table %}
-            </div>
-        </div>
-        <h3>Диаграммы</h3>
-        <div class="row justify-content-center mt-4">
-            <div class="col col-6">
-                <div>
-                    <canvas id="myChart"></canvas>
-                </div>
-                <script>
-                    const ctx = document.getElementById('myChart');
-                    new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: Array(`{{ months|safe }}`),
-                            datasets: [{
-                                label: 'Количество нарушений',
-                                data: [77],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-            </script>
-            </div>
-        </div>
-        <div class="row justify-content-center mt-4">
-            <div class="col col-6">
-                <div>
-                    <canvas id="chart4"></canvas>
-                </div>
-                <script>
-                    const ctx4 = document.getElementById('chart4');
+{% block title %} Статистика {% endblock title %}
 
-                    new Chart(ctx4, {
-                        type: 'pie',
-                        data: {
-                            labels: Array(`{{ months|safe }}`),
-                            datasets: [{
-                                label: 'Количество нарушений',
-                                data: [77],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            scales: {
-                                y: {
-                                    beginAtZero: true
-                                }
-                            }
-                        }
-                    });
-            </script>
-            </div>
-        </div>
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h2>Статистика нарушений</h2>
     </div>
-    {% endblock content %}
-    {% endblock body %}
-</body>
-</html>
+    <div class="col col-auto">
+            {% block sidebar %}
+            <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
+                Фильтры
+            </button>
+            <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
+                <div class="offcanvas-header">
+                    <h5 id="offcanvasStartLabel">Фильтры</h5>
+                    <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                </div>
+                <div class="offcanvas-body">
+                    <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                        {% if messages %}
+                        <div class="messages">
+                        {% for message in messages %}
+                            <div class="error-message">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        </div>
+                        {% endif %}
+                        <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
+                        <button type="submit" class="btn btn-outline-dark mt-4">Показать</button>
+                    </form>
+                </div>
+            </div>
+            {% endblock sidebar %}
+        </div>
+</div>
+<div class="row">
+    <div class="col">
+        {% block table %}
+        <table class="table table-hover table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th scope="col">Месяц</th>
+                    <th scope="col">Количество нарушений</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for item in data %}
+                <tr>
+                    <td>{{ item.month }}</td>
+                    <td>{{ item.count }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td class="text-end fw-bold" colspan="1">Итого</td>
+                    <td>{{ violations_count }}</td>
+                </tr>
+            </tbody>
+        </table>
+        {% endblock table %}
+    </div>
+</div>
+{% if daily_violations %}
+<h3>Диаграммы</h3>
+<div class="row justify-content-center mt-4">
+    <div class="col col-6">
+        <div>
+            <canvas id="myChart"></canvas>
+        </div>
+        <script>
+            let months = `{{ daily_violations.labels|safe }}`.replace('[', '').replace(']', '').split(',');
+            let str_counts = `{{ daily_violations.counts|safe }}`.replace('[', '').replace(']', '').replace(' ', '').split(',');
+            let counts = [];
+            for (i=0; i<str_counts.length; i++) {
+                console.log(str_counts[i]);
+                counts.push(Number(str_counts[i]));
+            }
+            const ctx = document.getElementById('myChart');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Количество нарушений',
+                        data: counts,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                        beginAtZero: true
+                        }
+                    }
+                }
+            });
+    </script>
+    </div>
+</div>
+<div class="row justify-content-center mt-4">
+    <div class="col col-6">
+        <div>
+            <canvas id="chart4"></canvas>
+        </div>
+        <script>
+            const ctx4 = document.getElementById('chart4');
+            new Chart(ctx4, {
+                type: 'pie',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Количество нарушений',
+                        data: counts,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+    </script>
+    </div>
+</div>
+{% else %}
+<h3>Фильтры не заданы</h3>
+{% endif %}
+{% endblock content %}

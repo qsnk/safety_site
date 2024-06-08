@@ -13,6 +13,25 @@ class AddCameraForm(forms.Form):
     }))
 
 
+class FilterCameraForm(forms.Form):
+    date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    date_end = forms.DateField(label='[дата] до', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    month = forms.CharField(label="Месяц и год", required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'month',
+    }))
+    time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
+        'class': 'form-control',
+        'type': 'time'
+    }))
+
+
 class AddPlaceForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
@@ -28,6 +47,25 @@ class AddPlaceForm(forms.Form):
         'class': 'form-control'
     }))
     camera_id = forms.ModelChoiceField(label="Камера участка", required=True, queryset=Camera.objects.none())
+
+
+class FilterPlaceForm(forms.Form):
+    date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    date_end = forms.DateField(label='[дата] до', required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
+    month = forms.CharField(label="Месяц и год", required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'month',
+    }))
+    time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
+        'class': 'form-control',
+        'type': 'time'
+    }))
 
 
 class ShowPlaceForm(forms.Form):
@@ -50,6 +88,10 @@ class FilterJournalForm(forms.Form):
     date_end = forms.DateField(label='[дата] до',required=False, widget=forms.DateInput(attrs={
         'class': 'form-control',
         'type': 'date'
+    }))
+    month = forms.CharField(label="Месяц и год", required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'month',
     }))
     time = forms.TimeField(label='Время', required=False, widget=forms.TimeInput(attrs={
         'class': 'form-control',
@@ -96,4 +138,11 @@ class FilterReportForm(forms.Form):
     violations = forms.MultipleChoiceField(label='Класс нарушения', required=False,
                                                choices=[],
                                                 widget=forms.CheckboxSelectMultiple(attrs={'type': 'checkbox'
+    }))
+
+
+class FilterStatisticsForm(forms.Form):
+    month_year = forms.CharField(label="Месяц и год", required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'month',
     }))

@@ -1,105 +1,125 @@
-<!DOCTYPE html>
 {% extends 'cabinet/base_cabinet.html' %}
 {% load static %}
-<html lang="en">
-<head>
-    {% block head %}
-        {{ block.super }}
-        <title>{% block title %} Добавление камер {% endblock title %}</title>
-    {% endblock head %}
-</head>
-<body>
-    {% block body %}
-    {{ block.super }}
-    {% block content %}
-        <div class="container mt-4">
-            <div class="row">
-                <div class="col">
-                    {% block add_cameras %}
-                    <h2>Добавление камер</h2>
-                    <div class="row">
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Добавить камеру</button>
+{% block title %} Добавление камер {% endblock title %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        {% block add_cameras %}
+        <h2>Добавление камер</h2>
+        <div class="row">
+            <div class="col">
+                <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-whatever="@mdo">Добавить камеру</button>
+            </div>
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Добавить камеру</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="exampleModalLabel">Добавить камеру</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <div class="modal-body">
+                            <form method="post">
+                                {% csrf_token %}
+                                {{ form.as_p }}
+                                {% if messages %}
+                                <div class="messages">
+                                {% for message in messages %}
+                                    <div class="error-message">
+                                        {{ message }}
                                     </div>
-                                    <div class="modal-body">
-                                        <form method="post">
-                                            {% csrf_token %}
-                                            {{ form.as_p }}
-                                            {% if messages %}
-                                            <div class="messages">
-                                            {% for message in messages %}
-                                                <div class="error-message">
-                                                    {{ message }}
-                                                </div>
-                                            {% endfor %}
-                                            </div>
-                                            {% endif %}
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Закрыть</button>
-                                                <button type="submit" class="btn btn-outline-dark">Добавить</button>
-                                            </div>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <h3 class="mt-4">Камеры</h3>
-                    <div class="row">
-                        <div class="col">
-                            {% block cameras_table %}
-                            <table class="table table-hover table-bordered">
-                                <thead class="table-secondary">
-                                    <tr>
-                                        <th scope="col">Название</th>
-                                        <th scope="col">Ссылка</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="table-group-divider">
-                                {% for camera in page %}
-                                <tr>
-                                    <td>{{ camera.name }}</td>
-                                    <td>{{ camera.url }}</td>
-                                </tr>
                                 {% endfor %}
-                                </tbody>
-                            </table>
-                            {% endblock cameras_table %}
+                                </div>
+                                {% endif %}
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Закрыть</button>
+                                    <button name="add-camera-button" type="submit" class="btn btn-outline-dark">Добавить</button>
+                                </div>
+                            </form>
                         </div>
                     </div>
-                    {% endblock add_cameras %}
-                    <nav aria-label="Page navigation">
-                        <ul class="pagination">
-                            {% if page.has_previous %}
-                                <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">&laquo;</a></li>
-                            {% else %}
-                                <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
-                            {% endif %}
-                            {% for button in page.paginator.page_range %}
-                                {% if page.number == button %}
-                                    <li class="page-item active"><a class="page-link" href="#">{{ page.number }}</a></li>
-                                {% else %}
-                                    <li class="page-item"><a class="page-link" href="?page={{ button }}">{{ button }}</a></li>
-                                {% endif %}
-                            {% endfor %}
-                            {% if page.has_next %}
-                                <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">&raquo</a></li>
-                            {% else %}
-                                <li class="page-item disabled"><a class="page-link" href="#">&raquo</a></li>
-                            {% endif %}
-                        </ul>
-                    </nav>
                 </div>
             </div>
         </div>
-    {% endblock content %}
-    {% endblock body %}
-</body>
-</html>
+        {% endblock add_cameras %}
+    </div>
+    <div class="col col-auto">
+        {% block sidebar %}
+        <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
+            Фильтры
+        </button>
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasStart" aria-labelledby="offcanvasStartLabel">
+            <div class="offcanvas-header">
+                <h5 id="offcanvasStartLabel">Фильтры</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <form method="post">
+                {% csrf_token %}
+                {{ filter_form.as_p }}
+                    {% if messages %}
+                    <div class="messages">
+                    {% for message in messages %}
+                        <div class="error-message">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    </div>
+                    {% endif %}
+                    <button type="button" class="btn btn-outline-dark mt-4" id="clean_inputs">Очистить выбор</button>
+                    <button name="show-filter-button" type="submit" class="btn btn-outline-dark mt-4">Показать</button>
+                </form>
+            </div>
+        </div>
+        {% endblock sidebar %}
+    </div>
+</div>
+<div class="row">
+    <h3 class="mt-4">Камеры</h3>
+    <div class="col">
+        {% block cameras_table %}
+        <table class="table table-hover table-bordered">
+            <thead class="table-secondary">
+                <tr>
+                    <th scope="col">Название</th>
+                    <th class="text-center" scope="col">Дата</th>
+                    <th class="text-center"scope="col">Время</th>
+                    <th scope="col">Ссылка</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+            {% for camera in page %}
+            <tr>
+                <td>{{ camera.name }}</td>
+                <td class="text-center">{{ camera.date_time.date }}</td>
+                <td class="text-center">{{ camera.date_time.time }}</td>
+                <td>{{ camera.url }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {% endblock cameras_table %}
+    </div>
+    <nav aria-label="Page navigation">
+            <ul class="pagination">
+                {% if page.has_previous %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page.previous_page_number }}">&laquo;</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link" href="#">&laquo;</a></li>
+                {% endif %}
+                {% for button in page.paginator.page_range %}
+                    {% if page.number == button %}
+                        <li class="page-item active"><a class="page-link" href="#">{{ page.number }}</a></li>
+                    {% else %}
+                        <li class="page-item"><a class="page-link" href="?page={{ button }}">{{ button }}</a></li>
+                    {% endif %}
+                {% endfor %}
+                {% if page.has_next %}
+                    <li class="page-item"><a class="page-link" href="?page={{ page.next_page_number }}">&raquo</a></li>
+                {% else %}
+                    <li class="page-item disabled"><a class="page-link" href="#">&raquo</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+</div>
+{% endblock content %}
