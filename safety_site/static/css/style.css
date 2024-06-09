@@ -1,0 +1,49 @@
+button:hover{
+    background: #fff;
+    svg{
+        fill: #fff;
+    }
+}
+.nav-link.active{
+    --bs-navbar-active-color: #0d6efd;
+}
+li a:hover{
+    color: #0d6efd !important;
+}
+table{
+    --bs-table-hover-bg: #0d6efd !important;
+    --bs-table-hover-color: #fff !important;
+}
+table{
+    button:hover{
+    background: #fff;
+    svg{
+        fill: #0d6efd;
+    }
+}
+}
+table tr:hover{
+    .btn-outline-dark{
+        --bs-btn-border-color: #000000;
+        --bs-btn-hover-bg: #fff;
+    }
+    button{
+        background-color: #fff;
+    }
+    a{
+        color: #0d6efd !important;
+    }
+}
+.table-primary{
+    --bs-table-bg: #5b9bf9 !important;
+    --bs-table-color: #fff !important;
+}
+.page-item{
+    --bs-link-color: #0d6efd !important;
+    --bs-pagination-active-bg: #5b9bf9 !important;
+}
+.page-item:active{
+    li a:hover{
+        --bs-link-color: #fff !important;
+    }
+}

@@ -79,7 +79,7 @@
     <div class="col">
         {% block cameras_table %}
         <table class="table table-hover table-bordered">
-            <thead class="table-secondary">
+            <thead class="table-primary">
                 <tr>
                     <th scope="col">Название</th>
                     <th class="text-center" scope="col">Дата</th>
@@ -87,7 +87,7 @@
                     <th scope="col">Ссылка</th>
                 </tr>
             </thead>
-            <tbody class="table-group-divider">
+            <tbody class="">
             {% for camera in page %}
             <tr>
                 <td>{{ camera.name }}</td>

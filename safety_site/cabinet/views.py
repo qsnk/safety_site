@@ -1,5 +1,4 @@
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import logout
@@ -176,10 +175,9 @@ def add_places(request):
 @login_required(login_url="/login/")
 def watch_site(request):
     sites_cache = cache.get('sites')
+    print(sites_cache)
     if request.method == "POST":
-        if 'play-button' in request.POST:
-            return stream_video(request)
-
+        form = ShowPlaceForm(request.POST, user_id=request.user)
         if 'stop-button' in request.POST:
             cache.set('sites', None, 60 * 60)
             cv2.VideoCapture().release()
@@ -188,36 +186,27 @@ def watch_site(request):
             return render(request, 'cabinet/watch_site.html', context)
 
         if 'show-button' in request.POST:
-            form = ShowPlaceForm(request.POST, user_id=request.user)
             if form.is_valid():
                 choices = form.cleaned_data["places"]
-                if choices is not None:
+                if choices:
                     sites = {place.pk: place.name for place in choices}
                     cache.set('sites', sites, 60 * 60 * 24)
                     print(sites)
                 else:
                     sites = None
                     cache.set('sites', sites, 60 * 60)
-                form = ShowPlaceForm(user_id=request.user)
                 context = {'form': form, 'sites': sites}
                 return render(request, 'cabinet/watch_site.html', context)
-    else:
-        if sites_cache is not None:
-            sites = sites_cache
-        else:
-            sites = None
 
-        cache.set('sites', sites, 60 * 60)
-        form = ShowPlaceForm(user_id=request.user)
-        places = Place.objects.filter(user_id=request.user)
-        context = {'places': places, 'sites': sites, 'form': form}
-        return render(request, 'cabinet/watch_site.html', context)
+    form = ShowPlaceForm(user_id=request.user)
+    places = Place.objects.filter(user_id=request.user)
+    context = {'places': places, 'sites': sites_cache, 'form': form}
+    return render(request, 'cabinet/watch_site.html', context)
 
-def stream_video(request):
+def stream_video(request, id):
     sites_cached = cache.get('sites')
     if sites_cached is not None:
-        index = int(list(sites_cached.keys())[0])
-        chosen_camera = Place.objects.get(pk=index).camera_id
+        chosen_camera = Place.objects.get(pk=id).camera_id
         url = chosen_camera.url
         camera = IpCamera(url)
         return StreamingHttpResponse(generate_frames(request, camera), content_type='multipart/x-mixed-replace; boundary=frame')
@@ -428,7 +417,7 @@ def generate_frames(request, camera):
     while camera.capture.isOpened():
         frame = camera.get_frame(request)
         yield (b'--frame\r\n'
-				b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
 def create_pdf_report(request, title, date_time, violation_object, image_path, output_path):
     c = canvas.Canvas(output_path, pagesize=letter)
