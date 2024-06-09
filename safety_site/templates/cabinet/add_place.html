@@ -77,31 +77,31 @@
 <div class="row">
     <h3 class="mt-4">Участки</h3>
     <div class="col">
-            {% block place_table %}
-                <table class="table table-hover table-bordered">
-                    <thead class="table-secondary">
-                        <tr>
-                            <th scope="col">Название</th>
-                            <th class="text-center" scope="col">Дата</th>
-                            <th class="text-center" scope="col">Время</th>
-                            <th scope="col">Описание</th>
-                            <th scope="col">Камера</th>
-                        </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                    {% for place in page %}
-                        <tr>
-                            <td>{{ place.name }}</td>
-                            <td class="text-center">{{ place.date_time.date }}</td>
-                            <td class="text-center">{{ place.date_time.time }}</td>
-                            <td>{{ place.description }}</td>
-                            <td>{{ place.camera_id.name }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endblock place_table %}
-            </div>
+        {% block place_table %}
+            <table class="table table-hover table-bordered">
+                <thead class="table-primary">
+                    <tr>
+                        <th scope="col">Название</th>
+                        <th class="text-center" scope="col">Дата</th>
+                        <th class="text-center" scope="col">Время</th>
+                        <th scope="col">Описание</th>
+                        <th scope="col">Камера</th>
+                    </tr>
+                </thead>
+                <tbody class="">
+                {% for place in page %}
+                    <tr>
+                        <td>{{ place.name }}</td>
+                        <td class="text-center">{{ place.date_time.date }}</td>
+                        <td class="text-center">{{ place.date_time.time }}</td>
+                        <td>{{ place.description }}</td>
+                        <td>{{ place.camera_id.name }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endblock place_table %}
+        </div>
     <nav aria-label="Page navigation">
             <ul class="pagination">
                 {% if page.has_previous %}

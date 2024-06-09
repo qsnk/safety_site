@@ -42,7 +42,7 @@
     <div class="col">
         {% block table %}
         <table class="table table-hover table-bordered">
-            <thead class="table-secondary">
+            <thead class="table-primary">
                 <tr>
                     <th class="text-center" scope="col">Дата</th>
                     <th class="text-center" scope="col">Время</th>
@@ -51,7 +51,7 @@
                     <th class="text-center" scope="col">Фото</th>
                 </tr>
             </thead>
-            <tbody class="table-group-divider">
+            <tbody class="">
                 {% for violation in page %}
                 <tr>
                     <td class="text-center">{{ violation.date_time.date }}</td>

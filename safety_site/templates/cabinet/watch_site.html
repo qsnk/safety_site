@@ -20,10 +20,12 @@
         </div>
         <div class="row">
             {% if sites %}
-            <div class="row">
+            <div class="row row-cols-2">
+                {% for id, name in sites.items %}
                 <div class="col col-auto">
-                    <img src="{% url 'stream_video' %}" alt="Загрузка изображения..." width="640" height="480">
+                    <img src="{% url 'stream_video' id %}" alt="Загрузка изображения..." width="426" height="320">
                 </div>
+                {% endfor %}
             </div>
             {% else %}
             <div class="row mt-4 d-flex">
@@ -45,23 +47,16 @@
         <div class="row d-flex justify-content-center">
             <form class="d-flex" method="post">
                 {% csrf_token %}
-                <div class="col">
-                   <button class="btn btn-outline-dark" type="submit" value="play" name="play-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="black" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11.5964 8.69663L5.23279 12.3885C4.6925 12.7019 4 12.3228 4 11.6922L4 4.30846C4 3.67783 4.6925 3.29871 5.23279 3.61216L11.5964 7.30403C12.1345 7.6162 12.1345 8.38445 11.5964 8.69663Z"/>
-                        </svg>
-                    </button>
-                </div>
-                <div class="col">
+                {% if sites %}
+                <div class="col col-auto">
                     <button class="btn btn-outline-dark" type="submit" value="stop" name="stop-button">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="black" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 3.5H11C11.8284 3.5 12.5 4.17157 12.5 5V11C12.5 11.8284 11.8284 12.5 11 12.5H5C4.17157 12.5 3.5 11.8284 3.5 11V5C3.5 4.17157 4.17157 3.5 5 3.5Z"/>
-                        </svg>
+                        Остановить все
                     </button>
                 </div>
+                {% endif %}
                 <div class="col">
                     <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasStart" aria-controls="offcanvasStart">
-                        Фильтры
+                        Выбрать
                     </button>
                 </div>
             </form>
