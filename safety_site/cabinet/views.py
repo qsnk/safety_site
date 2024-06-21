@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import logout
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Count, Q
+from django.db.models import Count
 from django.db.models.functions import TruncMonth, TruncDay
 from django.utils.dateformat import DateFormat
 from django.http.response import StreamingHttpResponse, HttpResponse, FileResponse
@@ -181,6 +181,7 @@ def watch_site(request):
         if 'stop-button' in request.POST:
             cache.set('sites', None, 60 * 60)
             cv2.VideoCapture().release()
+            cv2.VideoWriter().release()
             form = ShowPlaceForm(user_id=request.user)
             context = {'form': form}
             return render(request, 'cabinet/watch_site.html', context)
@@ -418,6 +419,8 @@ def generate_frames(request, camera):
         frame = camera.get_frame(request)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+    camera.capture.release()
+    camera.video_writer.release()
 
 def create_pdf_report(request, title, date_time, violation_object, image_path, output_path):
     c = canvas.Canvas(output_path, pagesize=letter)
@@ -430,7 +433,7 @@ def create_pdf_report(request, title, date_time, violation_object, image_path, o
     c.drawString(1 * inch, height - 1 * inch, title)
     c.setTitle(title)
     c.setFont('DejaVuSans', 12)
-    c.drawString(1 * inch, height - 1.5 * inch, f"Дата и время: {date_time}")
+    c.drawString(1 * inch, height - 1.5 * inch, f"Дата и время формирования: {date_time}")
     c.drawString(1 * inch, height - 2 * inch, f"Объект нарушения: {violation_object}")
     c.drawString(1 * inch, height - 2.5 * inch, "Изображение:")
     full_image_url = urljoin(f'{request.scheme}://{request.get_host()}', image_path)
@@ -456,7 +459,7 @@ def create_pdf_report(request, title, date_time, violation_object, image_path, o
 def create_word_report(request, title, date_time, violation_object, image_url):
     doc = Document()
     doc.add_heading(title, level=1)
-    doc.add_paragraph(f"Дата и время: {date_time}")
+    doc.add_paragraph(f"Дата и время формирования: {date_time}")
     doc.add_paragraph(f"Объект нарушения: {violation_object}")
     doc.add_paragraph("Изображение:")
     full_image_url = urljoin(f'{request.scheme}://{request.get_host()}', image_url)

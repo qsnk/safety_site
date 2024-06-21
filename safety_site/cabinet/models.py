@@ -37,12 +37,14 @@ class Place(models.Model):
 class Violation(models.Model):
     date_time = models.DateTimeField(name="date_time", auto_now_add=True, verbose_name="Дата и время нарушения", null=False, help_text="Введите дату и время нарушения")
     violation_class = models.CharField(name="violation_class", max_length=100, null=False, help_text="Введите название нарушения", verbose_name="Название нарушения")
+    violation_class_ru = models.CharField(name="violation_class_ru", max_length=100, null=False, default="Отсутствует", help_text="Введите название нарушения на руссокм", verbose_name="Название нарушения (рус)")
     description = models.CharField(max_length=200, null=True, help_text="Введите описание нарушения", verbose_name="Описание нарушения")
-    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='violations/')
+    photo = models.ImageField(name="photo", verbose_name="Изображение", null=False, upload_to='violations/images/')
     user_id = models.ForeignKey(User, on_delete=models.CASCADE, db_column="user_id", verbose_name="Идентификатор пользователя")
+    video = models.FileField(name="video", verbose_name="Видео", null=True, default=None, upload_to='violations/videos/')
 
     def __str__(self):
-        return f'{self.violation_class} [{self.date_time.strftime("%d-%m-%Y %H:%M")}]'
+        return f'{self.violation_class_ru} [{self.date_time.strftime("%d-%m-%Y %H:%M")}]'
 
 
 class Report(models.Model):
