@@ -66,6 +66,11 @@
                                 <path d="M8 5.5C6.61929 5.5 5.5 6.61929 5.5 8C5.5 9.38071 6.61929 10.5 8 10.5C9.38071 10.5 10.5 9.38071 10.5 8C10.5 6.61929 9.38071 5.5 8 5.5ZM4.5 8C4.5 6.067 6.067 4.5 8 4.5C9.933 4.5 11.5 6.067 11.5 8C11.5 9.933 9.933 11.5 8 11.5C6.067 11.5 4.5 9.933 4.5 8Z"/>
                             </svg>
                         </button>
+                        <a href="{{ violation.video.url }}" download="{{ violation.video.url }}">
+                            <button class="btn btn-outline-dark">
+                                скачать
+                            </button>
+                        </a>
                         <div class="modal fade" id="show-video" tabindex="-1" aria-labelledby="videoShow" aria-hidden="true">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
