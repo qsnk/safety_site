@@ -5,7 +5,7 @@ from django.contrib.auth import logout
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.db.models import Count
-from django.db.models.functions import TruncMonth, TruncDay
+from django.db.models.functions import TruncMonth, TruncDay, TruncHour
 from django.utils.dateformat import DateFormat
 from django.http.response import StreamingHttpResponse, HttpResponse, FileResponse
 from cabinet.forms import AddCameraForm, AddPlaceForm, ShowPlaceForm, FilterJournalForm, AddReportForm, \
@@ -245,7 +245,7 @@ def journal(request):
                 violations = violations.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
 
             if violation_classes:
-                violations = violations.filter(violation_class__in=violation_classes).order_by('-pk')
+                violations = violations.filter(violation_class_ru__in=violation_classes).order_by('-pk')
 
             paginator = Paginator(violations, 20)
             page_number = request.GET.get('page')
@@ -329,7 +329,7 @@ def reports(request):
                     reports = Report.objects.filter(date_time__hour=time.hour, date_time__minute=time.minute).order_by('-pk')
 
                 if violation_classes:
-                    violations = Violation.objects.filter(violation_class__in=violation_classes)
+                    violations = Violation.objects.filter(violation_class_ru__in=violation_classes)
                     reports = Report.objects.filter(violation_id__in=violations).order_by('-pk')
 
                 report_form = AddReportForm(user_id=request.user)
@@ -369,33 +369,48 @@ def statistics(request):
     if request.method == "POST":
         form = FilterStatisticsForm(request.POST)
         if form.is_valid():
+            day = form.cleaned_data["day"]
             month_year = form.cleaned_data["month_year"]
-            year = month_year.split("-")[0]
-            month = month_year.split("-")[1]
-            violations = Violation.objects.filter(user_id=request.user).filter(date_time__year=year, date_time__month=month).order_by('-pk')
-            violations_count = len(violations)
-            daily_violations = Violation.objects.filter(date_time__year=year, date_time__month=month) \
-                .annotate(day=TruncDay('date_time')) \
-                .values('day') \
-                .annotate(count=Count('id')) \
-                .order_by('day')
+            data = None
+            violations_count = None
+            if day:
+                violations = Violation.objects.filter(date_time__day=day.day).order_by('-pk')
+                hourly_violations = violations.filter(date_time__date=day) \
+                    .annotate(hour=TruncHour('date_time')) \
+                    .values('hour') \
+                    .annotate(count=Count('id')) \
+                    .order_by('hour')
 
-            data = {
-                'labels': [entry['day'].strftime('%d %B %Y') for entry in daily_violations],
-                'counts': [entry['count'] for entry in daily_violations]
-            }
-            all_violations = Violation.objects.filter(user_id=request.user).order_by('-pk')
-            months = all_violations.annotate(month=TruncMonth('date_time')).values('month').annotate(
-                count=Count('id')).order_by('month')
-            violations_months = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
+                data = {
+                    'labels': [entry['hour'].strftime('%H:00') for entry in hourly_violations],
+                    'counts': [entry['count'] for entry in hourly_violations]
+                }
+                violations_count = len(violations)
+            if month_year:
+                year = month_year.split("-")[0]
+                month = month_year.split("-")[1]
+                violations = Violation.objects.filter(user_id=request.user).filter(date_time__year=year, date_time__month=month).order_by('-pk')
+                daily_violations = violations.filter(date_time__year=year, date_time__month=month) \
+                    .annotate(day=TruncDay('date_time')) \
+                    .values('day') \
+                    .annotate(count=Count('id')) \
+                    .order_by('day')
+
+                data = {
+                    'labels': [entry['day'].strftime('%d %B %Y') for entry in daily_violations],
+                    'counts': [entry['count'] for entry in daily_violations]
+                }
+
+                violations_count = len(violations)
 
             context = {
                 'form': form,
-                'month': month,
-                'year': year,
+                'day': day,
+                'month_year': month_year,
                 'violations_count': violations_count,
-                'daily_violations': data,
-                'data': violations_months
+                'violations': data,
+                'data': data,
+                'zip_data': zip(data['labels'], data['counts']),
 
             }
             return render(request, 'cabinet/statistics.html', context)
@@ -407,7 +422,7 @@ def statistics(request):
     data = [{'month': DateFormat(entry['month']).format('F Y'), 'count': entry['count']} for entry in months]
     context = {
         'form': form,
-        'violations': violations,
+        'all_violations': violations,
         'violations_count': violations_count,
         'data': data,
         'months': [item["month"] for item in data]
@@ -419,8 +434,6 @@ def generate_frames(request, camera):
         frame = camera.get_frame(request)
         yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
-    camera.capture.release()
-    camera.video_writer.release()
 
 def create_pdf_report(request, title, date_time, violation_object, image_path, output_path):
     c = canvas.Canvas(output_path, pagesize=letter)

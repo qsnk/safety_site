@@ -42,6 +42,48 @@
     <div class="col">
         {% block table %}
         <table class="table table-hover table-bordered">
+            {% if violations %}
+                {% if day %}
+                <thead class="table-primary">
+                <tr>
+                    <th scope="col">Время</th>
+                    <th scope="col">Количество нарушений</th>
+                </tr>
+            </thead>
+                <tbody class="">
+                {% for time, count in zip_data %}
+                <tr>
+                    <td>{{ time }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td class="text-end fw-bold" colspan="1">Итого</td>
+                    <td>{{ violations_count }}</td>
+                </tr>
+            </tbody>
+                {% endif %}
+                {% if month_year %}
+                <thead class="table-primary">
+                <tr>
+                    <th scope="col">День</th>
+                    <th scope="col">Количество нарушений</th>
+                </tr>
+            </thead>
+                <tbody class="">
+                {% for day, count in zip_data %}
+                <tr>
+                    <td>{{ day }}</td>
+                    <td>{{ count }}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td class="text-end fw-bold" colspan="1">Итого</td>
+                    <td>{{ violations_count }}</td>
+                </tr>
+            </tbody>
+                {% endif %}
+            {% else %}
             <thead class="table-primary">
                 <tr>
                     <th scope="col">Месяц</th>
@@ -60,11 +102,13 @@
                     <td>{{ violations_count }}</td>
                 </tr>
             </tbody>
+            {% endif %}
+
         </table>
         {% endblock table %}
     </div>
 </div>
-{% if daily_violations %}
+{% if violations %}
 <h3>Диаграммы</h3>
 <div class="row justify-content-center mt-4">
     <div class="col col-6">
@@ -72,8 +116,8 @@
             <canvas id="myChart"></canvas>
         </div>
         <script>
-            let months = `{{ daily_violations.labels|safe }}`.replace('[', '').replace(']', '').split(',');
-            let str_counts = `{{ daily_violations.counts|safe }}`.replace('[', '').replace(']', '').replace(' ', '').split(',');
+            let months = `{{ violations.labels|safe }}`.replace('[', '').replace(']', '').split(',');
+            let str_counts = `{{ violations.counts|safe }}`.replace('[', '').replace(']', '').replace(' ', '').split(',');
             let counts = [];
             for (i=0; i<str_counts.length; i++) {
                 console.log(str_counts[i]);

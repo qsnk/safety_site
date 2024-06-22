@@ -80,7 +80,7 @@ class FilterJournalForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
         super(FilterJournalForm, self).__init__(*args, **kwargs)
-        self.fields['violations'].choices = [(violation.violation_class, violation.violation_class) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class').distinct('violation_class')]
+        self.fields['violations'].choices = [(violation.violation_class_ru, violation.violation_class_ru) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class_ru').distinct('violation_class_ru')]
     date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
         'class': 'form-control',
         'type': 'date'
@@ -122,7 +122,7 @@ class FilterReportForm(forms.Form):
     def __init__(self, *args, **kwargs):
         user_id = kwargs.pop('user_id', None)
         super(FilterReportForm, self).__init__(*args, **kwargs)
-        self.fields['violations'].choices = [(violation.violation_class, violation.violation_class) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class').distinct('violation_class')]
+        self.fields['violations'].choices = [(violation.violation_class_ru, violation.violation_class_ru) for violation in Violation.objects.filter(user_id=user_id).order_by('violation_class_ru').distinct('violation_class_ru')]
     date_start = forms.DateField(label='[дата] от', required=False, widget=forms.DateInput(attrs={
         'class': 'form-control',
         'type': 'date'
@@ -142,6 +142,10 @@ class FilterReportForm(forms.Form):
 
 
 class FilterStatisticsForm(forms.Form):
+    day = forms.DateField(label="День", required=False, widget=forms.DateInput(attrs={
+        'class': 'form-control',
+        'type': 'date'
+    }))
     month_year = forms.CharField(label="Месяц и год", required=False, widget=forms.DateInput(attrs={
         'class': 'form-control',
         'type': 'month',

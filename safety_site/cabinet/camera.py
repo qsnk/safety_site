@@ -1,16 +1,19 @@
-from cabinet.models import NeuralNetwork, Violation
-import cv2, ultralytics, os, time
+import cv2
+import ultralytics
+import os
+import time
 from datetime import datetime, timedelta
 from collections import deque
+from cabinet.models import NeuralNetwork, Violation
 
 
 class IpCamera(object):
     def __init__(self, url):
         self.url = url
-        self.capture = cv2.VideoCapture("static/video/video.mp4")  # "static/video/video.mp4"  self.url
-        self.model = ultralytics.YOLO(
-            NeuralNetwork.objects.get(pk=len(NeuralNetwork.objects.all())).file.url[1:])  # "yolov8n.pt"
-        self.violations = ['no vest', 'no helmet', 'no boots', 'no glove']
+        self.capture = cv2.VideoCapture(self.url)
+        neural_network = NeuralNetwork.objects.order_by('pk').last()
+        self.model = ultralytics.YOLO(neural_network.file.url[1:])
+        self.violations = ['no vest', 'no helmet', 'no boots', 'no glove', 'no hat']
         self.frame_width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.frame_height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.fps = 10
@@ -27,7 +30,8 @@ class IpCamera(object):
 
     def __del__(self):
         self.capture.release()
-        self.video_writer.release() if self.video_writer is not None else None
+        if self.video_writer is not None:
+            self.video_writer.release()
 
     def get_frame(self, request):
         if not self.capture.isOpened():
@@ -55,6 +59,9 @@ class IpCamera(object):
                     case 'no helmet':
                         description = "Отсутствует защитная каска"
                         violation_class_ru = "нет каски"
+                    case 'no hat':
+                        description = "Отсутствует защитная каска"
+                        violation_class_ru = "нет каски"
                     case 'no glove':
                         description = "Отсутствуют защитные перчатки"
                         violation_class_ru = "нет перчаток"
@@ -66,20 +73,24 @@ class IpCamera(object):
 
                 if not self.recording:
                     self.record_start_time = datetime.now()
-                    self.video_writer = cv2.VideoWriter(os.path.join('media', 'violations', 'videos',
-                                                                f'{"-".join(detection_class.split())}_{datetime.now().day}.{datetime.now().month}.{datetime.now().year}_{datetime.now().hour}-{datetime.now().minute}.mp4'),
-                                                   self.fourcc, self.fps, (self.frame_width, self.frame_height))
-                    cv2.imwrite(os.path.join('media', 'violations', 'images',
-                                                          f'{"-".join(detection_class.split())} {datetime.now().day}.{datetime.now().month}.{datetime.now().year} {datetime.now().hour}:{datetime.now().minute}.jpg'),
-                                             results[0].plot())
+                    video_path = os.path.join('media', 'violations', 'videos',
+                                              f'{"-".join(detection_class.split())}_{self.record_start_time.strftime("%d.%m.%Y_%H-%M-%S")}.mp4')
+                    self.video_writer = cv2.VideoWriter(video_path, self.fourcc, self.fps,
+                                                        (self.frame_width, self.frame_height))
+                    if not self.video_writer.isOpened():
+                        raise Exception("Could not open video writer")
+
+                    img_path = os.path.join('media', 'violations', 'images',
+                                            f'{"-".join(detection_class.split())}_{self.record_start_time.strftime("%d.%m.%Y_%H-%M-%S")}.jpg')
+                    cv2.imwrite(img_path, results[0].plot())
                     violation = Violation(
-                        date_time=datetime.now().strftime('%y-%m-%d-%H:%M:%S'),
+                        date_time=self.record_start_time.strftime('%y-%m-%d-%H:%M:%S'),
                         violation_class=detection_class,
                         violation_class_ru=violation_class_ru,
                         description=description,
-                        photo=f'violations/images/{"-".join(detection_class.split())} {datetime.now().day}.{datetime.now().month}.{datetime.now().year} {datetime.now().hour}:{datetime.now().minute}.jpg',
+                        photo=f'violations/images/{"-".join(detection_class.split())}_{self.record_start_time.strftime("%d.%m.%Y_%H-%M-%S")}.jpg',
                         user_id=request.user,
-                        video=f'violations/videos/{"-".join(detection_class.split())}_{datetime.now().day}.{datetime.now().month}.{datetime.now().year}_{datetime.now().hour}-{datetime.now().minute}.mp4'
+                        video=f'violations/videos/{"-".join(detection_class.split())}_{self.record_start_time.strftime("%d.%m.%Y_%H-%M-%S")}.mp4'
                     )
                     violation.save()
                     for buffered_frame in self.frame_buffer:
@@ -93,7 +104,9 @@ class IpCamera(object):
             if datetime.now() - self.record_start_time >= timedelta(seconds=10):
                 self.recording = False
                 self.violation_detected = False
-                self.video_writer.release()
+                if self.video_writer is not None:
+                    self.video_writer.release()
+                    self.video_writer = None
         resized_frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_LINEAR)
         _, frame = cv2.imencode('.jpg', resized_frame)
         return frame.tobytes()
