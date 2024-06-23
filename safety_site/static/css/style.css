@@ -52,5 +52,5 @@ table tr:hover{
     }
 }
 .btn-close:hover{
-    color: #000000 !important;
+    background-color: red !important;
 }

@@ -144,6 +144,33 @@
             });
     </script>
     </div>
+    <div class="col col-6">
+        <div>
+        <canvas id="linear"></canvas>
+    </div>
+        <script>
+            const linear = document.getElementById('linear');
+            new Chart(linear, {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Количество нарушений',
+                        data: counts,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+    </script>
+    </div>
+
 </div>
 <div class="row justify-content-center mt-4">
     <div class="col col-6">
